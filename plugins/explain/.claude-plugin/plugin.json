@@ -1,0 +1,11 @@
+{
+  "name": "explain",
+  "description": "Explain how code works with a short answer and a plain-text visual traced from the source: call tree, file tree, sequence diagram, diff, or an HTML page",
+  "version": "1.0.0",
+  "author": {
+    "name": "Krzysztof Karczewski",
+    "email": "kr.karczewski@gmail.com"
+  },
+  "repository": "https://github.com/karczews/skills",
+  "keywords": ["explain", "visualization", "diagrams", "call-tree", "code"]
+}

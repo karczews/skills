@@ -1,0 +1,26 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "karczews-skills",
+  "owner": {
+    "name": "Krzysztof Karczewski",
+    "email": "kr.karczewski@gmail.com"
+  },
+  "metadata": {
+    "description": "Agent skills for Claude Code and OpenCode, one plugin per skill",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "explain",
+      "description": "Explain how code works with a short answer and a plain-text visual traced from the source: call tree, file tree, sequence diagram, diff, or an HTML page",
+      "version": "1.0.0",
+      "author": {
+        "name": "Krzysztof Karczewski",
+        "email": "kr.karczewski@gmail.com"
+      },
+      "source": "./plugins/explain",
+      "category": "productivity",
+      "keywords": ["explain", "visualization", "diagrams", "call-tree", "code"]
+    }
+  ]
+}
