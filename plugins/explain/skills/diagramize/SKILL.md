@@ -228,7 +228,7 @@ One broken label turns a whole block into an error message, so:
 
 - Quote the labels of a `flowchart` and of `erDiagram` relationships: `A["parse(file)"]`, `-->|"on timeout"|`, `JOB ||--o{ ATTEMPT : "has many"`. Unquoted brackets, parentheses and colons break a flowchart, and an unquoted ER label with spaces falls apart.
 - Write every other label bare: sequence messages, notes and participant names, state transitions, class members and class relations. Quote marks there show up as text. Bare labels hold brackets, parentheses and colons, except a class relation label, which takes `#58;` for a colon. A state name with spaces is declared as `state "Waiting for token" as waiting`; those quotes are syntax.
-- In every label, write `#59;` for `;` and `#35;` for `#`, and inside a quoted label `#quot;` for a double quote. A bare `;` ends the line, and a `#` can swallow the text after it.
+- In every label, write `#59;` for `;`, `#35;` for `#` and `#lt;` for `<`, and inside a quoted label `#quot;` for a double quote. A bare `;` ends the line, a `#` can swallow the text after it, and Mermaid reads `<` as the start of an HTML tag.
 - Break a line inside a label with `<br/>`.
 - Write `End`, not `end`, as a flowchart label. Lowercase `end` closes a block.
 - Start comments with `%%` at the beginning of a line, and keep braces out of them.
@@ -244,13 +244,13 @@ One broken label turns a whole block into an error message, so:
 When you can run `npx`, check every Mermaid block before you hand the result back. Run this as one command, with the file's path in place of `FILE.md`:
 
 ```bash
-out="$(mktemp -d)" && npx -y --prefer-offline @mermaid-js/mermaid-cli@12.2.0 -q -i FILE.md -o "$out/check.md"; echo "exit $?"; ls "$out"
+out="$(mktemp -d)" && npx -y --prefer-offline @mermaid-js/mermaid-cli@12.2.0 -q -i FILE.md -o "$out/check.md" && ls "$out"
 ```
 
 - Pass the whole Markdown file. The tool checks every block fenced with ```` ```mermaid ````, including blocks indented inside a list. For an HTML page, copy its Mermaid sources into a scratch `.md` file, each in a ```` ```mermaid ```` fence, and check that.
-- The check passes when the exit status is 0 and the folder holds one `check-N.svg` for each Mermaid block you wrote. A block without its file went unseen, usually through a wrong fence, and is unchecked.
+- The check passes when the command succeeds and lists one `check-N.svg` for each Mermaid block you wrote. A block without its file went unseen, usually through a wrong fence, and is unchecked.
 - In a Markdown file, each `check-N.svg` also contains the frontmatter's `primaryColor`. Mermaid ignores a misread or misspelled config without an error, so a missing colour means the frontmatter did not apply.
-- On a non-zero exit, read the error. `Parse error on line N` points into a block, `YAMLException` into its frontmatter, and anything else at the tool, its folder or its browser.
+- When it fails, read the error. `Parse error on line N` points into a block, `YAMLException` into its frontmatter, and anything else at the tool, its folder or its browser.
 - The tool drives a Chrome browser. If it reports that it cannot find one, set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome, on macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
 - If you cannot run the check, say that the diagrams are unchecked.
 

@@ -12,16 +12,13 @@ references/mermaid-light.json and mermaid-dark.json:
 Before writing anything, mermaid-cli draws the preview.md blocks twice, once with
 the light frontmatter and once with the dark config in the same form. Every block
 must come out as an SVG with the config's primaryColor in it, which catches a
-broken source, a misfenced block and frontmatter that YAML misread. The check runs
-mermaid-cli through npx; set MMDC to an mmdc binary to use that instead, or pass
---no-check to write the files unchecked. The pre-commit hook in .githooks/ runs
-this script."""
+broken source and frontmatter that YAML misread. The check runs mermaid-cli
+through npx; set MMDC to an mmdc binary to use that instead. The pre-commit hook
+in .githooks/ runs this script."""
 
-import argparse
 import html
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -103,8 +100,7 @@ def mmdc_command():
         return [os.environ["MMDC"]]
     if shutil.which("npx"):
         return ["npx", "-y", "--prefer-offline", f"@mermaid-js/mermaid-cli@{MERMAID}"]
-    sys.exit("npx not found. Install Node.js, set MMDC to an mmdc binary, "
-             "or pass --no-check to write the files unchecked.")
+    sys.exit("npx not found. Install Node.js, or set MMDC to an mmdc binary.")
 
 
 def check(sources, configs):
@@ -129,16 +125,11 @@ def check(sources, configs):
                          "or set MMDC to an mmdc binary.")
             if result.returncode != 0:
                 sys.exit(f"mermaid-cli failed on the {name} blocks:\n{result.stderr.strip()}")
-            svgs = {int(m.group(1)): p for p in Path(tmp).glob(f"{name}-out-*.svg")
-                    if (m := re.fullmatch(rf"{name}-out-(\d+)\.svg", p.name))}
-            if sorted(svgs) != list(range(1, len(sources) + 1)):
-                sys.exit(f"mermaid-cli drew {len(svgs)} of {len(sources)} {name} blocks")
-            colour = config.get("themeVariables", {}).get("primaryColor", "").lower()
-            if not colour:
-                sys.exit(f"the {name} config has no themeVariables.primaryColor to check for")
+            colour = config["themeVariables"]["primaryColor"].lower()
             for i, src_file in enumerate(sources, 1):
-                if colour not in svgs[i].read_text().lower():
-                    sys.exit(f"{src_file.name} drawn without {colour}: the {name} frontmatter did not apply")
+                svg = Path(tmp) / f"{name}-out-{i}.svg"
+                if not svg.exists() or colour not in svg.read_text().lower():
+                    sys.exit(f"{src_file.name} was not drawn with the {name} config's {colour}")
     print(f"mermaid-cli drew all {len(sources)} diagrams with each config")
 
 
@@ -189,7 +180,7 @@ def preview_html(sources, configs):
 </head>
 <body>
   <h1>diagramize preview</h1>
-  <p class="lead">Each Mermaid kind as diagramize draws it. HTML pages use <code>mermaid-light.json</code> on a light page and <code>mermaid-dark.json</code> on a dark page, and switch when the viewer's colour scheme does. Markdown files always use <code>mermaid-light.json</code>, because a Markdown block cannot follow the viewer's colour scheme.</p>
+  <p class="lead">Each Mermaid kind as diagramize draws it. HTML pages use <code>mermaid-light.json</code> on a light page and <code>mermaid-dark.json</code> on a dark page. Markdown files always use <code>mermaid-light.json</code>, because a Markdown block cannot follow the viewer's colour scheme.</p>
 {chr(10).join(sections)}
 <script src="https://cdn.jsdelivr.net/npm/mermaid@{MERMAID}/dist/mermaid.min.js"></script>
 <script>
@@ -209,10 +200,6 @@ def preview_html(sources, configs):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--no-check", action="store_true", help="write the files without drawing them first")
-    args = parser.parse_args()
-
     found = sorted(p.stem for p in OUT.glob("*.mmd"))
     unknown = [n for n in found if n not in ORDER]
     missing = [n for n in ORDER if n not in found]
@@ -220,10 +207,7 @@ def main():
         sys.exit(f"sources and ORDER differ: unknown {unknown}, missing {missing}")
     sources = [OUT / f"{n}.mmd" for n in ORDER]
     configs = {"light": json.loads(LIGHT.read_text()), "dark": json.loads(DARK.read_text())}
-    if args.no_check:
-        print("Skipping the mermaid-cli check; the files are unchecked", file=sys.stderr)
-    else:
-        check(sources, configs)
+    check(sources, configs)
     outputs = {
         FRONTMATTER: frontmatter_file(configs["light"]),
         OUT / "preview.html": preview_html(sources, configs),

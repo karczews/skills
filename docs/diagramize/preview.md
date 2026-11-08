@@ -68,7 +68,7 @@ sequenceDiagram
     A->>W: enqueue
     A-->>C: 202, id
     C-->>U: id
-    loop every 5 s, until done
+    loop every 5 s
         C->>A: GET /jobs/id
     end
     alt job done
