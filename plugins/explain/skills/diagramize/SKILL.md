@@ -239,13 +239,13 @@ One broken label turns a whole block into an error message, so:
 
 ## 7. Check that it renders
 
-When you can run `npx`, check every Mermaid block in a Markdown file or an HTML page before you hand the result back. Run this as one command, with the file's path in place of `FILE.md`:
+When you can run `npx`, check every Mermaid block in a Markdown file or an HTML page before you hand the result back. Run this as one command, with the file's absolute path in place of `FILE.md`:
 
 ```bash
-out="$(mktemp -d)" && npx -y --prefer-offline -p puppeteer@25 -p @mermaid-js/mermaid-cli@12.2.0 mmdc -q -i FILE.md -o "$out/check.md" && ls "$out"
+out="$(mktemp -d)" && (cd "$out" && npx -y --prefer-offline -p puppeteer@25 -p @mermaid-js/mermaid-cli@12.2.0 mmdc -q -i "FILE.md" -o "$out/check.md") && ls "$out"
 ```
 
-- The command names `puppeteer@25` because mermaid-cli lists it only as a peer dependency, which npm leaves out under `legacy-peer-deps`.
+- The command names `puppeteer@25` because mermaid-cli lists it only as a peer dependency, which npm leaves out under `legacy-peer-deps`. It runs `npx` from the empty folder so that npx installs both packages together instead of reusing a mermaid-cli the project already has.
 - Pass the whole Markdown file. The tool checks every block fenced with ```` ```mermaid ````, including blocks indented inside a list. For an HTML page, copy its Mermaid sources into a scratch `.md` file, each in a ```` ```mermaid ```` fence, and check that.
 - The check passes when the command succeeds and lists one `check-N.svg` for each Mermaid block you wrote. A block without its file went unseen, usually through a wrong fence, and is unchecked.
 - In a Markdown file, each `check-N.svg` also contains the frontmatter's `primaryColor`. Mermaid ignores a misread or misspelled config without an error, so a missing colour means the frontmatter did not apply.
