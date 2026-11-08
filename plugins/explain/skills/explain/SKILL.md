@@ -20,6 +20,8 @@ Answer with at most two sentences and one visual sized to the question, in the t
 
 When the topic involves code, open the files it touches and trace the path you are about to draw. When that path spans many files and you can start a subagent, give it the search: ask for the entry point and the path through the code with `path:line` for each step. Then open the lines you will cite and check them before drawing.
 
+When the topic is a change, read the change, not just the files: the diff or the two versions, the text that announced it (commit message, PR description, linked issue), and the tests that cover the changed path. Take the before sentence from the deleted lines and the after sentence from the added ones. Find the callers of the changed names. They say who is affected and what stays the same.
+
 What goes into the visual:
 
 - Symbols and paths spelled exactly as the code does.
@@ -31,6 +33,7 @@ What goes into the visual:
 
 - For the exact code to write, the visual is the full code block. Write the code out in full when the change is mostly new, or when a diff's missing lines would leave the reader unsure where it goes.
 - For everything else, find the row of `diagramize`'s "Pick the kind" table that matches what the question asks. `diagramize` draws that row's kind for wherever the answer goes. When the Terminal shape would not fit the terminal limits, step 4 recommends the HTML page.
+- For a change, the visual is `diagramize`'s before and after. Draw both sides in the same kind, and mark new or changed parts `(new)`. When the change spans modules, pair the before and after with a file tree diff, or name in a note line the parts the visual left out.
 
 ## 4. Ask where to show it
 
@@ -51,9 +54,9 @@ For the terminal, write the reply as in step 5. For HTML, build the page as in s
 
 The reply is, in order:
 
-1. The answer, in one or two sentences. They say what happens or where it lives; the visual shows how. Steps, formulas and lists of parts go in the visual, never in these sentences. For a change, one sentence says how it worked before and one says how it works after.
-2. The visual, drawn by `diagramize` for the terminal. One by default; up to three when the question has separate parts, each with a one-line lead. A before and after pair counts as one visual.
-3. At most three lines on what to notice, or the open decision.
+1. The answer, in one or two sentences. They say what happens or where it lives; the visual shows how. Steps, formulas and lists of parts go in the visual, never in these sentences. For a change, the first sentence says how it worked before and why that failed; the second says how it works after and what stays the same.
+2. The visual, drawn by `diagramize` for the terminal. One by default; up to three when the question has separate parts, each with a one-line lead. A before and after pair counts as one visual. When the change is too large for one visual, explain the part the question asks about and name what was left out, as the terminal rules do with `…`.
+3. At most three lines on what to notice, or the open decision. For a change, use the lines for what the tests cover, what stays unverified, and the open decision.
 
 ### Prose
 

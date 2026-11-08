@@ -13,7 +13,7 @@
     {
       "name": "explain",
       "description": "Explain how code works with a short answer and a visual traced from the source, and draw diagrams for a terminal, a Markdown file or an HTML page",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "author": {
         "name": "Krzysztof Karczewski",
         "email": "kr.karczewski@gmail.com"
