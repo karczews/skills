@@ -30,7 +30,7 @@ What goes into the visual:
 ## 3. Pick the visual
 
 - For the exact code to write, the visual is the full code block. Write the code out in full when the change is mostly new, or when a diff's missing lines would leave the reader unsure where it goes.
-- For everything else, pick the kind of diagram from the Terminal column of `diagramize`'s "Pick the kind" table, from what the question asks. When that shape would not fit the terminal limits, step 4 recommends the HTML page, where `diagramize` draws the same content in its HTML form.
+- For everything else, find the row of `diagramize`'s "Pick the kind" table that matches what the question asks. Hand `diagramize` the content, that row and the destination, and it draws the kind that destination's column names. When the Terminal shape would not fit the terminal limits, step 4 recommends the HTML page.
 
 ## 4. Ask where to show it
 
@@ -77,7 +77,7 @@ When your previous reply in this conversation drew a visual and the new question
 
 ## 7. Save to a file
 
-When the topic asked to save the answer (step 1), write it to the named file, or to `docs/explain/<topic-slug>.md` for `to docs`. The file holds the same answer and notes, with the visuals drawn by `diagramize` for a Markdown file. Reply with the two-sentence answer and the file path.
+When the topic asked to save the answer (step 1), write it to the named file, or to `docs/explain/<topic-slug>.md` for `to docs`. The file holds the same answer and notes, with the visuals drawn by `diagramize` for a Markdown file from the same rows of its table, so a sequence or state diagram becomes Mermaid. Reply with the two-sentence answer and the file path.
 
 ## 8. HTML page
 

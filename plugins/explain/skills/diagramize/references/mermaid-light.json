@@ -12,7 +12,8 @@
     "actorTextColor": "#000000",
     "noteTextColor": "#000000",
     "signalColor": "#3b82f6",
-    "signalTextColor": "#2563eb"
+    "signalTextColor": "#3574e9",
+    "loopTextColor": "#3574e9"
   },
   "themeCSS": ".labelBkg { background-color: #dbeafe; }"
 }

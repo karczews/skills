@@ -1,15 +1,43 @@
 #!/usr/bin/env bash
-# Regenerate docs/diagramize/preview.html and preview.md when a diagramize Mermaid config or a
-# preview source changes, so the committed page always shows the current look.
+# Regenerate diagramize's generated files when one of their inputs, or one of the files
+# themselves, is staged, so the commit carries files built from what it commits.
 set -euo pipefail
 
-watched='^(plugins/explain/skills/diagramize/references/mermaid-(light|dark)\.json|docs/diagramize/[^/]+\.mmd|scripts/render-diagramize-preview\.py)$'
+inputs=(
+  plugins/explain/skills/diagramize/references/mermaid-light.json
+  plugins/explain/skills/diagramize/references/mermaid-dark.json
+  'docs/diagramize/*.mmd'
+  scripts/render-diagramize-preview.py
+)
+outputs=(
+  plugins/explain/skills/diagramize/references/mermaid-light-frontmatter.yaml
+  docs/diagramize/preview.html
+  docs/diagramize/preview.md
+)
 
-if git diff --cached --name-only | grep -Eq "$watched"; then
-  echo "pre-commit: diagramize settings changed, regenerating docs/diagramize/preview.html and preview.md"
-  if ! python3 scripts/render-diagramize-preview.py; then
-    echo "pre-commit: failed; fix it or run scripts/render-diagramize-preview.py by hand" >&2
-    exit 1
-  fi
-  git add docs/diagramize/preview.html docs/diagramize/preview.md
+# --quiet answers through the exit status, with no pipe that a long list of staged
+# files could cut short.
+if git diff --cached --quiet -- "${inputs[@]}" "${outputs[@]}"; then
+  exit 0
+fi
+
+# The script reads the working tree, so the inputs there must be exactly what is staged.
+unstaged="$(git diff --name-only -- "${inputs[@]}"; git ls-files --others --exclude-standard -- "${inputs[@]}")"
+if [ -n "$unstaged" ]; then
+  echo "pre-commit: these diagramize inputs differ from what is staged; stage or stash them first:" >&2
+  echo "$unstaged" >&2
+  exit 1
+fi
+
+echo "pre-commit: regenerating diagramize's generated files"
+if ! python3 scripts/render-diagramize-preview.py; then
+  echo "pre-commit: failed; fix it, or see python3 scripts/render-diagramize-preview.py --help" >&2
+  exit 1
+fi
+git add -- "${outputs[@]}"
+
+# A commit that only hand-edited a generated file has just had that edit overwritten.
+if git diff --cached --quiet; then
+  echo "pre-commit: nothing left to commit; edit the inputs, not the generated files" >&2
+  exit 1
 fi

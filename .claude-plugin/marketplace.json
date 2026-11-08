@@ -6,14 +6,14 @@
     "email": "kr.karczewski@gmail.com"
   },
   "metadata": {
-    "description": "Agent skills for Claude Code and OpenCode, one plugin per skill",
+    "description": "Agent skills for Claude Code and OpenCode",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "explain",
       "description": "Explain how code works with a short answer and a visual traced from the source, and draw diagrams for a terminal, a Markdown file or an HTML page",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "author": {
         "name": "Krzysztof Karczewski",
         "email": "kr.karczewski@gmail.com"

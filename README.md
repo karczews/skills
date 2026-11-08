@@ -36,11 +36,13 @@ It runs only when you ask for it:
 @explain how a request reaches the database           # OpenCode
 ```
 
-Ask a follow-up and it extends the previous diagram as a diff, in the same place as before. End the request with `in html` or `in terminal` to skip the question, or with `to docs` or `to <file>.md` to save the answer as markdown, with Mermaid diagrams. `diagramize` draws the diagrams.
+Ask a follow-up and it extends the previous diagram in the same place as before: as a diff of a text diagram, or as the whole Mermaid diagram again with the new parts marked `(new)`. End the request with `in html` or `in terminal` to skip the question, or with `to docs` or `to <file>.md` to save the answer as markdown, with Mermaid diagrams. `diagramize` draws the diagrams.
 
 ### diagramize
 
-Draws a diagram in the form the place it is read can show: plain text with box-drawing glyphs for a terminal, and Mermaid for a Markdown file or an HTML page. It picks the kind of diagram from what it has to show, quotes Mermaid labels so they parse, and checks every Mermaid block with `mermaid-cli` when it can. Mermaid colours live in `plugins/explain/skills/diagramize/references/`: `mermaid-light.json` for Markdown files and light HTML pages, `mermaid-dark.json` for dark HTML pages. [`docs/diagramize/preview.md`](docs/diagramize/preview.md) shows each kind as it appears in a Markdown file, and [`docs/diagramize/preview.html`](docs/diagramize/preview.html), opened in a browser, shows the exact look of HTML pages in light and dark mode. Both are regenerated whenever a config changes.
+Draws a diagram in the form the place it is read can show: plain text with box-drawing glyphs for a terminal, and Mermaid for a Markdown file or an HTML page. It picks the kind of diagram from what it has to show, writes Mermaid labels so they parse, and checks every Mermaid block with `mermaid-cli` when it can. Mermaid colours live in `plugins/explain/skills/diagramize/references/`: `mermaid-light.json` for Markdown files and light HTML pages, `mermaid-dark.json` for dark HTML pages, and `mermaid-light-frontmatter.yaml`, the light config as the frontmatter diagramize copies into Markdown files. [`docs/diagramize/preview.md`](docs/diagramize/preview.md) shows each kind as it appears in a Markdown file, and [`docs/diagramize/preview.html`](docs/diagramize/preview.html), opened in a browser, shows the exact look of HTML pages in light and dark mode.
+
+`scripts/render-diagramize-preview.py` generates the frontmatter file and both previews from the two configs and `docs/diagramize/*.mmd`, and writes them only after `mermaid-cli` draws every diagram. The pre-commit hook in `.githooks/` runs it when one of those files is staged. The hook is off until you enable it with `git config core.hooksPath .githooks`, and no CI job runs the script, so with the hook off, run it yourself after changing a config or a source.
 
 `explain` calls it for every diagram. You can also call it yourself, and end the request with `in terminal`, `in html` or `to <file>.md`:
 

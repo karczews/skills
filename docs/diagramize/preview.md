@@ -2,7 +2,7 @@
 
 # diagramize preview
 
-Each Mermaid kind as diagramize writes it in a Markdown file, with the settings from [`mermaid-light.json`](../../plugins/explain/skills/diagramize/references/mermaid-light.json). Text sits on light fills, so the diagrams read on light and dark pages. Each viewer draws them with its own Mermaid version, so details can differ. [`preview.html`](preview.html) shows the exact look of diagramize's HTML pages.
+Each Mermaid kind as diagramize writes it in a Markdown file, with the settings from [`mermaid-light.json`](../../plugins/explain/skills/diagramize/references/mermaid-light.json). Text sits on light fills, except sequence messages and loop conditions, which use a mid blue that reads on light and dark pages. Each viewer draws the diagrams with its own Mermaid version, so details can differ. [`preview.html`](preview.html) shows the exact look of diagramize's HTML pages.
 
 ## flowchart
 
@@ -22,7 +22,8 @@ config:
     actorTextColor: "#000000"
     noteTextColor: "#000000"
     signalColor: "#3b82f6"
-    signalTextColor: "#2563eb"
+    signalTextColor: "#3574e9"
+    loopTextColor: "#3574e9"
   themeCSS: ".labelBkg { background-color: #dbeafe; }"
 ---
 flowchart TD
@@ -53,7 +54,8 @@ config:
     actorTextColor: "#000000"
     noteTextColor: "#000000"
     signalColor: "#3b82f6"
-    signalTextColor: "#2563eb"
+    signalTextColor: "#3574e9"
+    loopTextColor: "#3574e9"
   themeCSS: ".labelBkg { background-color: #dbeafe; }"
 ---
 sequenceDiagram
@@ -66,7 +68,15 @@ sequenceDiagram
     A->>W: enqueue
     A-->>C: 202, id
     C-->>U: id
-    W-xA: report failure
+    loop every 5 s, until done
+        C->>A: GET /jobs/id
+    end
+    alt job done
+        A-->>C: result
+    else job failed
+        W-xA: report failure
+        A-->>C: error
+    end
     Note over A,W: the worker retries up to 3 times
 ```
 
@@ -88,7 +98,8 @@ config:
     actorTextColor: "#000000"
     noteTextColor: "#000000"
     signalColor: "#3b82f6"
-    signalTextColor: "#2563eb"
+    signalTextColor: "#3574e9"
+    loopTextColor: "#3574e9"
   themeCSS: ".labelBkg { background-color: #dbeafe; }"
 ---
 stateDiagram-v2
@@ -120,7 +131,8 @@ config:
     actorTextColor: "#000000"
     noteTextColor: "#000000"
     signalColor: "#3b82f6"
-    signalTextColor: "#2563eb"
+    signalTextColor: "#3574e9"
+    loopTextColor: "#3574e9"
   themeCSS: ".labelBkg { background-color: #dbeafe; }"
 ---
 classDiagram
@@ -137,6 +149,10 @@ classDiagram
     }
     Backend <|.. S3Backend
     Backend <|.. GcsBackend
+    class Uploader {
+        +upload(file) id
+    }
+    Uploader --> Backend : stores blobs in
 ```
 
 ## er
@@ -157,11 +173,12 @@ config:
     actorTextColor: "#000000"
     noteTextColor: "#000000"
     signalColor: "#3b82f6"
-    signalTextColor: "#2563eb"
+    signalTextColor: "#3574e9"
+    loopTextColor: "#3574e9"
   themeCSS: ".labelBkg { background-color: #dbeafe; }"
 ---
 erDiagram
-    JOB ||--o{ ATTEMPT : has
+    JOB ||--o{ ATTEMPT : "has"
     JOB ||--o| RESULT : "produces one"
     JOB {
         string id
