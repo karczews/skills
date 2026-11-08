@@ -86,7 +86,15 @@ sequenceDiagram
     A-&gt;&gt;W: enqueue
     A--&gt;&gt;C: 202, id
     C--&gt;&gt;U: id
-    W-xA: report failure
+    loop every 5 s
+        C-&gt;&gt;A: GET /jobs/id
+    end
+    alt job done
+        A--&gt;&gt;C: result
+    else job failed
+        W-xA: report failure
+        A--&gt;&gt;C: error
+    end
     Note over A,W: the worker retries up to 3 times
       </pre></figure>
       <figure class="dark"><figcaption>HTML, dark page</figcaption><pre class="mermaid" data-config="dark">
@@ -100,7 +108,15 @@ sequenceDiagram
     A-&gt;&gt;W: enqueue
     A--&gt;&gt;C: 202, id
     C--&gt;&gt;U: id
-    W-xA: report failure
+    loop every 5 s
+        C-&gt;&gt;A: GET /jobs/id
+    end
+    alt job done
+        A--&gt;&gt;C: result
+    else job failed
+        W-xA: report failure
+        A--&gt;&gt;C: error
+    end
     Note over A,W: the worker retries up to 3 times
       </pre></figure>
       <figure class="dark"><figcaption>Markdown, dark page</figcaption><pre class="mermaid" data-config="light">
@@ -114,7 +130,15 @@ sequenceDiagram
     A-&gt;&gt;W: enqueue
     A--&gt;&gt;C: 202, id
     C--&gt;&gt;U: id
-    W-xA: report failure
+    loop every 5 s
+        C-&gt;&gt;A: GET /jobs/id
+    end
+    alt job done
+        A--&gt;&gt;C: result
+    else job failed
+        W-xA: report failure
+        A--&gt;&gt;C: error
+    end
     Note over A,W: the worker retries up to 3 times
       </pre></figure>
     </div>
@@ -128,7 +152,15 @@ sequenceDiagram
     A-&gt;&gt;W: enqueue
     A--&gt;&gt;C: 202, id
     C--&gt;&gt;U: id
-    W-xA: report failure
+    loop every 5 s
+        C-&gt;&gt;A: GET /jobs/id
+    end
+    alt job done
+        A--&gt;&gt;C: result
+    else job failed
+        W-xA: report failure
+        A--&gt;&gt;C: error
+    end
     Note over A,W: the worker retries up to 3 times</pre></details>
   </section>
   <section>
@@ -196,6 +228,10 @@ classDiagram
     }
     Backend &lt;|.. S3Backend
     Backend &lt;|.. GcsBackend
+    class Uploader {
+        +upload(file) id
+    }
+    Uploader --&gt; Backend : stores blobs in
       </pre></figure>
       <figure class="dark"><figcaption>HTML, dark page</figcaption><pre class="mermaid" data-config="dark">
 classDiagram
@@ -212,6 +248,10 @@ classDiagram
     }
     Backend &lt;|.. S3Backend
     Backend &lt;|.. GcsBackend
+    class Uploader {
+        +upload(file) id
+    }
+    Uploader --&gt; Backend : stores blobs in
       </pre></figure>
       <figure class="dark"><figcaption>Markdown, dark page</figcaption><pre class="mermaid" data-config="light">
 classDiagram
@@ -228,6 +268,10 @@ classDiagram
     }
     Backend &lt;|.. S3Backend
     Backend &lt;|.. GcsBackend
+    class Uploader {
+        +upload(file) id
+    }
+    Uploader --&gt; Backend : stores blobs in
       </pre></figure>
     </div>
     <details><summary>Source: class.mmd</summary><pre class="src">classDiagram
@@ -243,14 +287,18 @@ classDiagram
         -string project
     }
     Backend &lt;|.. S3Backend
-    Backend &lt;|.. GcsBackend</pre></details>
+    Backend &lt;|.. GcsBackend
+    class Uploader {
+        +upload(file) id
+    }
+    Uploader --&gt; Backend : stores blobs in</pre></details>
   </section>
   <section>
     <h2>er</h2>
     <div class="row">
       <figure class="light"><figcaption>HTML or Markdown, light page</figcaption><pre class="mermaid" data-config="light">
 erDiagram
-    JOB ||--o{ ATTEMPT : has
+    JOB ||--o{ ATTEMPT : &quot;has&quot;
     JOB ||--o| RESULT : &quot;produces one&quot;
     JOB {
         string id
@@ -263,7 +311,7 @@ erDiagram
       </pre></figure>
       <figure class="dark"><figcaption>HTML, dark page</figcaption><pre class="mermaid" data-config="dark">
 erDiagram
-    JOB ||--o{ ATTEMPT : has
+    JOB ||--o{ ATTEMPT : &quot;has&quot;
     JOB ||--o| RESULT : &quot;produces one&quot;
     JOB {
         string id
@@ -276,7 +324,7 @@ erDiagram
       </pre></figure>
       <figure class="dark"><figcaption>Markdown, dark page</figcaption><pre class="mermaid" data-config="light">
 erDiagram
-    JOB ||--o{ ATTEMPT : has
+    JOB ||--o{ ATTEMPT : &quot;has&quot;
     JOB ||--o| RESULT : &quot;produces one&quot;
     JOB {
         string id
@@ -289,7 +337,7 @@ erDiagram
       </pre></figure>
     </div>
     <details><summary>Source: er.mmd</summary><pre class="src">erDiagram
-    JOB ||--o{ ATTEMPT : has
+    JOB ||--o{ ATTEMPT : &quot;has&quot;
     JOB ||--o| RESULT : &quot;produces one&quot;
     JOB {
         string id
@@ -317,7 +365,8 @@ erDiagram
       "actorTextColor": "#000000",
       "noteTextColor": "#000000",
       "signalColor": "#3b82f6",
-      "signalTextColor": "#2563eb"
+      "signalTextColor": "#3574e9",
+      "loopTextColor": "#3574e9"
     },
     "themeCSS": ".labelBkg { background-color: #dbeafe; }"
   },

@@ -9,9 +9,9 @@ Draw a diagram in the form its destination can show. The caller, a skill or the 
 
 ## 1. Inputs
 
-- Content: the parts, steps or states and their labels. Use the names you are given and spell them the same way. Keep annotations such as `path:line` and `(?)` where the caller put them. Add nothing the caller did not give you.
+- Content: the parts, steps or states and their labels. Use the names you are given and spell them the same way. Keep annotations such as `path:line` and `(?)` where the caller put them. Add no parts, steps or labels the caller did not give you, except the UI details step 5 reads from the code.
 - Destination: the terminal, a Markdown file, or an HTML page. With none given, use the terminal.
-- Kind: pick it in step 2, unless the caller named one.
+- Kind: find the row of step 2 that fits the content, or that holds the kind the caller names, and draw the kind in this destination's column.
 
 When the user calls this skill directly, the text after the invocation names the subject, and may end with `in terminal`, `in html` or `to <file>.md` to name the destination. Read the code or files the subject points at, so the diagram carries real names.
 
@@ -171,14 +171,12 @@ Before and after table, for a fix:
 ## 4. Markdown file
 
 - Draw the kinds in the right column of step 2 as Mermaid blocks. Trees, pseudocode, tables, diffs and examples keep their terminal shapes.
-- Start each Mermaid block with a frontmatter `config` holding the keys of `references/mermaid-light.json`, next to this file, written as YAML. A Markdown block cannot follow the viewer's colour scheme, and the light config keeps all text on light fills, so it reads on light and dark pages:
+- Start each Mermaid block with the contents of `references/mermaid-light-frontmatter.yaml`, next to this file, copied unchanged. A Markdown block cannot follow the viewer's colour scheme, so this light config puts text on light fills, or in a mid blue that reads on light and dark pages:
 
   ```text
   ---
   config:
-    theme: base
-    look: classic
-    …                  # the rest of references/mermaid-light.json
+    …                  # the rest of references/mermaid-light-frontmatter.yaml
   ---
   flowchart TD
     …
@@ -189,11 +187,34 @@ Before and after table, for a fix:
 
 ## 5. HTML page
 
-- One self-contained file with inline CSS and JS. Load `https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js`, and follow the viewer's colour scheme. Read `references/mermaid-light.json` and `references/mermaid-dark.json`, pick one with `matchMedia("(prefers-color-scheme: dark)")`, and pass it to `mermaid.initialize({ startOnLoad: true, deterministicIds: true, ...config })`. Give the page a matching background, `#ffffff` for light and `#0d1117` for dark, with `@media (prefers-color-scheme: dark)`. Without `deterministicIds`, diagrams drawn in the same millisecond get the same id and land on top of each other.
+- One self-contained file with inline CSS and JS that follows the viewer's colour scheme, also when it changes while the page is open. Put each diagram's source in a `<pre class="mermaid">`, and end the body with this script, with the contents of `references/mermaid-light.json` and `references/mermaid-dark.json` pasted in place of the two comments. A page opened from disk cannot fetch files next to it.
+
+  ```html
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js"></script>
+  <script>
+    const configs = {
+      light: /* references/mermaid-light.json */,
+      dark: /* references/mermaid-dark.json */,
+    };
+    const scheme = matchMedia("(prefers-color-scheme: dark)");
+    const blocks = [...document.querySelectorAll("pre.mermaid")];
+    const sources = blocks.map((el) => el.innerHTML);
+    async function draw() {
+      mermaid.initialize({ startOnLoad: false, deterministicIds: true, ...configs[scheme.matches ? "dark" : "light"] });
+      blocks.forEach((el, i) => { el.innerHTML = sources[i]; el.removeAttribute("data-processed"); });
+      await mermaid.run({ nodes: blocks });
+    }
+    scheme.addEventListener("change", draw);
+    draw();
+  </script>
+  ```
+
+  Mermaid replaces each source with its drawing, so the script keeps the sources and draws again when the scheme changes. Without `deterministicIds`, diagrams drawn in the same millisecond get the same id and land on top of each other.
+- Give the page a matching background, `#ffffff` for light and `#0d1117` for dark, with `@media (prefers-color-scheme: dark)`.
 - The 20-line and 80-column limits do not apply. Draw the whole path instead of cutting branches to `…`.
 - Draw the kinds in the right column of step 2 as Mermaid. Trees, pseudocode and examples go in `<pre>` blocks; tables become HTML tables.
 - When the caller hands you text for the page, such as an answer or notes, put it around the diagrams unchanged.
-- For a UI, draw the screens from the real code: actual labels, values and states, with the colours, fonts and component names of the project's theme or design system. For a UI change, show the before and after screens side by side, stacked on a narrow window. Mermaid diagrams keep the configs from `references/`.
+- For a UI, draw the screens from the real code: actual labels, values and states, with the colours, fonts and component names of the project's theme or design system. Read that code yourself when the caller did not hand you those details. For a UI change, show the before and after screens side by side, stacked on a narrow window. Mermaid diagrams keep the configs from `references/`.
 - Check that the page fits a narrow window.
 - Write it to the path the caller gives, or to `${TMPDIR:-/tmp}/diagramize/<topic-slug>.html`, outside the repository.
 - Follow the Mermaid rules in step 6 and check the diagrams as step 7 says.
@@ -203,10 +224,11 @@ Before and after table, for a fix:
 
 One broken label turns a whole block into an error message, so:
 
-- Quote every node and edge label: `A["parse(file)"]`, `-->|"on timeout"|`. Unquoted brackets, parentheses and colons break the parse.
-- Break a line inside a quoted label with `<br/>`.
+- Quote the labels of a `flowchart` and of `erDiagram` relationships: `A["parse(file)"]`, `-->|"on timeout"|`, `JOB ||--o{ ATTEMPT : "has many"`. Unquoted brackets, parentheses and colons break a flowchart, and an unquoted ER label with spaces falls apart.
+- Write every other label bare: sequence messages, notes and participant names, state transitions, class members and class relations. Quote marks there show up as text. Bare labels hold brackets, parentheses and colons, except a class relation label, which takes `#58;` for a colon. A state name with spaces is declared as `state "Waiting for token" as waiting`; those quotes are syntax.
+- In every label, write `#59;` for `;`, `#35;` for `#` and `#lt;` for `<`, and inside a quoted label `#quot;` for a double quote. A bare `;` ends the line, a `#` can swallow the text after it, and Mermaid reads `<` as the start of an HTML tag.
+- Break a line inside a label with `<br/>`.
 - Write `End`, not `end`, as a flowchart label. Lowercase `end` closes a block.
-- Write characters that quoting cannot hold as numeric codes: `#35;` for `#`, `#quot;` for a double quote.
 - Start comments with `%%` at the beginning of a line, and keep braces out of them.
 - Give each node shape one meaning: `["step"]`, `{"decision"}`, `(["start or end"])`, `[("store")]`. Draw a boundary, such as a process or a permission scope, as a `subgraph`.
 - In a `sequenceDiagram`, `->>` is a call, `-->>` a return and `-x` a failed call. Put the reason for an ordering in a `Note over A,B:`.
@@ -214,18 +236,19 @@ One broken label turns a whole block into an error message, so:
 - Mark new or changed parts with a label such as `(new)`. Colour alone is lost on readers who cannot see it and in some themes.
 - Use only the types in step 2. Newer types carry exact keywords, such as `architecture-beta`, and many viewers cannot draw them; a `flowchart` with `subgraph` boundaries carries the same information.
 - Put links in the text next to the diagram. Viewers that render untrusted Markdown turn off `click` links.
-- Copy config keys from `references/mermaid-light.json` and `references/mermaid-dark.json` exactly. Mermaid ignores a misspelled key without an error, so a rendered diagram does not prove the config applied.
 
 ## 7. Check that it renders
 
-When you can run `npx`, check every Mermaid block before you hand the result back:
+When you can run `npx`, check every Mermaid block before you hand the result back. Run this as one command, with the file's path in place of `FILE.md`:
 
 ```bash
-npx -y --prefer-offline @mermaid-js/mermaid-cli@12.2.0 -i FILE.md -o "${TMPDIR:-/tmp}/diagramize/check.md"
+out="$(mktemp -d)" && npx -y --prefer-offline @mermaid-js/mermaid-cli@12.2.0 -q -i FILE.md -o "$out/check.md" && ls "$out"
 ```
 
-- Pass the whole Markdown file. The tool checks every block, including blocks indented inside a list. For an HTML page, copy its Mermaid sources into a scratch `.md` file and check that.
-- Read the exit status. Zero means every block parsed. Anything else comes with `Parse error on line N` and no output files.
+- Pass the whole Markdown file. The tool checks every block fenced with ```` ```mermaid ````, including blocks indented inside a list. For an HTML page, copy its Mermaid sources into a scratch `.md` file, each in a ```` ```mermaid ```` fence, and check that.
+- The check passes when the command succeeds and lists one `check-N.svg` for each Mermaid block you wrote. A block without its file went unseen, usually through a wrong fence, and is unchecked.
+- In a Markdown file, each `check-N.svg` also contains the frontmatter's `primaryColor`. Mermaid ignores a misread or misspelled config without an error, so a missing colour means the frontmatter did not apply.
+- When it fails, read the error. `Parse error on line N` points into a block, `YAMLException` into its frontmatter, and anything else at the tool or its browser.
 - The tool drives a Chrome browser. If it reports that it cannot find one, set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome, on macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
 - If you cannot run the check, say that the diagrams are unchecked.
 
@@ -233,4 +256,9 @@ Each viewer draws Markdown diagrams with its own Mermaid version, so details can
 
 ## 8. Extend a diagram
 
-When the caller extends a diagram drawn earlier in the conversation ("and on failure?", "where does the token come from?"), draw that same diagram again as a `diff` that adds the new part. Start a fresh diagram only when the new content needs a different kind.
+When the caller extends a diagram drawn earlier in the conversation ("and on failure?", "where does the token come from?"), draw that same diagram again with the new part, for the same destination:
+
+- A text shape, such as a tree, pseudocode or a text sequence diagram: a `diff` that adds the new part.
+- A Mermaid diagram: the whole diagram again, with each new node, message or edge labelled `(new)`. A `diff` of Mermaid source shows code, not a diagram.
+
+Start a fresh diagram only when the new content needs a different kind.

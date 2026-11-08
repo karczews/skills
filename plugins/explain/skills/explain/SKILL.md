@@ -30,7 +30,7 @@ What goes into the visual:
 ## 3. Pick the visual
 
 - For the exact code to write, the visual is the full code block. Write the code out in full when the change is mostly new, or when a diff's missing lines would leave the reader unsure where it goes.
-- For everything else, pick the kind of diagram from the Terminal column of `diagramize`'s "Pick the kind" table, from what the question asks. When that shape would not fit the terminal limits, step 4 recommends the HTML page, where `diagramize` draws the same content in its HTML form.
+- For everything else, find the row of `diagramize`'s "Pick the kind" table that matches what the question asks. `diagramize` draws that row's kind for wherever the answer goes. When the Terminal shape would not fit the terminal limits, step 4 recommends the HTML page.
 
 ## 4. Ask where to show it
 

@@ -8,5 +8,13 @@ sequenceDiagram
     A->>W: enqueue
     A-->>C: 202, id
     C-->>U: id
-    W-xA: report failure
+    loop every 5 s
+        C->>A: GET /jobs/id
+    end
+    alt job done
+        A-->>C: result
+    else job failed
+        W-xA: report failure
+        A-->>C: error
+    end
     Note over A,W: the worker retries up to 3 times

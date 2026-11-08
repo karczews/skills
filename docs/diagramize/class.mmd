@@ -12,3 +12,7 @@ classDiagram
     }
     Backend <|.. S3Backend
     Backend <|.. GcsBackend
+    class Uploader {
+        +upload(file) id
+    }
+    Uploader --> Backend : stores blobs in

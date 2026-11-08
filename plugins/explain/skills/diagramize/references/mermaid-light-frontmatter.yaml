@@ -1,0 +1,19 @@
+---
+config:
+  theme: "base"
+  look: "classic"
+  themeVariables:
+    darkMode: false
+    primaryColor: "#dbeafe"
+    primaryBorderColor: "#3b82f6"
+    primaryTextColor: "#000000"
+    textColor: "#000000"
+    lineColor: "#3b82f6"
+    edgeLabelBackground: "#dbeafe"
+    actorTextColor: "#000000"
+    noteTextColor: "#000000"
+    signalColor: "#3b82f6"
+    signalTextColor: "#3574e9"
+    loopTextColor: "#3574e9"
+  themeCSS: ".labelBkg { background-color: #dbeafe; }"
+---
