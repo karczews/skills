@@ -15,8 +15,6 @@ outputs=(
   docs/diagramize/preview.md
 )
 
-# --quiet answers through the exit status, with no pipe that a long list of staged
-# files could cut short.
 if git diff --cached --quiet -- "${inputs[@]}" "${outputs[@]}"; then
   exit 0
 fi

@@ -77,7 +77,7 @@ When your previous reply in this conversation drew a visual and the new question
 
 ## 7. Save to a file
 
-When the topic asked to save the answer (step 1), write it to the named file, or to `docs/explain/<topic-slug>.md` for `to docs`. The file holds the same answer and notes, with the visuals drawn by `diagramize` for a Markdown file from the same rows of its table, so a sequence or state diagram becomes Mermaid. Reply with the two-sentence answer and the file path.
+When the topic asked to save the answer (step 1), write it to the named file, or to `docs/explain/<topic-slug>.md` for `to docs`. The file holds the same answer and notes, with the visuals drawn by `diagramize` for a Markdown file. Reply with the two-sentence answer and the file path.
 
 ## 8. HTML page
 

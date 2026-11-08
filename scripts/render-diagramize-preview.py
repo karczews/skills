@@ -1,20 +1,9 @@
 #!/usr/bin/env python3
-"""Build diagramize's generated files from docs/diagramize/*.mmd and the skill's
-references/mermaid-light.json and mermaid-dark.json:
-
-- references/mermaid-light-frontmatter.yaml: the light config as the YAML
-  frontmatter diagramize copies into each Mermaid block of a Markdown file.
-- docs/diagramize/preview.md: each kind as a Markdown file shows it.
-- docs/diagramize/preview.html: each kind on HTML pages, with mermaid-light.json on
-  a light page and mermaid-dark.json on a dark page, plus the Markdown form on a
-  dark page.
-
-Before writing anything, mermaid-cli draws the preview.md blocks twice, once with
-the light frontmatter and once with the dark config in the same form. Every block
-must come out as an SVG with the config's primaryColor in it, which catches a
-broken source and frontmatter that YAML misread. The check runs mermaid-cli
-through npx; set MMDC to an mmdc binary to use that instead. The pre-commit hook
-in .githooks/ runs this script."""
+"""Build the skill's references/mermaid-light-frontmatter.yaml and
+docs/diagramize/preview.md and preview.html from docs/diagramize/*.mmd and the
+skill's references/mermaid-light.json and mermaid-dark.json, once check() has
+drawn every diagram. mermaid-cli runs through npx; set MMDC to an mmdc binary to
+use that instead."""
 
 import html
 import json
@@ -87,14 +76,6 @@ def preview_markdown(sources, light):
     ])
 
 
-def frontmatter_file(light):
-    return "\n".join([
-        "# Generated from mermaid-light.json by scripts/render-diagramize-preview.py.",
-        "# Copy the lines from the first --- to the last --- to the top of each Mermaid block.",
-        frontmatter(light),
-    ]) + "\n"
-
-
 def mmdc_command():
     if os.environ.get("MMDC"):
         return [os.environ["MMDC"]]
@@ -104,32 +85,27 @@ def mmdc_command():
 
 
 def check(sources, configs):
-    """Draw every source in its Markdown form with each config, and fail unless each
-    block comes out as an SVG that carries the config's colours."""
+    """Draw every source in its Markdown form with each config, in one mermaid-cli
+    run, and fail unless each block comes out as an SVG that carries its config's
+    primaryColor. That catches a broken source and frontmatter that YAML misread."""
     command = mmdc_command()
     env = dict(os.environ)
     if "PUPPETEER_EXECUTABLE_PATH" not in env and os.access(CHROME, os.X_OK):
         env["PUPPETEER_EXECUTABLE_PATH"] = CHROME
     with tempfile.TemporaryDirectory() as tmp:
-        for name, config in configs.items():
-            src = Path(tmp) / f"{name}.md"
-            src.write_text(markdown(sources, config, [f"# {name}"]))
-            try:
-                result = subprocess.run(
-                    [*command, "-q", "-i", str(src), "-o", f"{tmp}/{name}-out.md"],
-                    env=env, capture_output=True, text=True, timeout=TIMEOUT,
-                )
-            except subprocess.TimeoutExpired:
-                sys.exit(f"mermaid-cli did not finish within {TIMEOUT} s. If npx is installing it, "
-                         f"run `npx -y @mermaid-js/mermaid-cli@{MERMAID} --version` once, "
-                         "or set MMDC to an mmdc binary.")
-            if result.returncode != 0:
-                sys.exit(f"mermaid-cli failed on the {name} blocks:\n{result.stderr.strip()}")
-            colour = config["themeVariables"]["primaryColor"].lower()
-            for i, src_file in enumerate(sources, 1):
-                svg = Path(tmp) / f"{name}-out-{i}.svg"
-                if not svg.exists() or colour not in svg.read_text().lower():
-                    sys.exit(f"{src_file.name} was not drawn with the {name} config's {colour}")
+        md = Path(tmp) / "check.md"
+        md.write_text("".join(markdown(sources, config, [f"# {name}"])
+                              for name, config in configs.items()))
+        result = subprocess.run([*command, "-q", "-i", str(md), "-o", f"{tmp}/out.md"],
+                                env=env, capture_output=True, text=True, timeout=TIMEOUT)
+        if result.returncode != 0:
+            sys.exit(f"mermaid-cli failed:\n{result.stderr.strip()}")
+        blocks = [(name, config["themeVariables"]["primaryColor"].lower(), src)
+                  for name, config in configs.items() for src in sources]
+        for i, (name, colour, src) in enumerate(blocks, 1):
+            svg = Path(tmp) / f"out-{i}.svg"
+            if not svg.exists() or colour not in svg.read_text().lower():
+                sys.exit(f"{src.name} was not drawn with the {name} config's {colour}")
     print(f"mermaid-cli drew all {len(sources)} diagrams with each config")
 
 
@@ -209,7 +185,7 @@ def main():
     configs = {"light": json.loads(LIGHT.read_text()), "dark": json.loads(DARK.read_text())}
     check(sources, configs)
     outputs = {
-        FRONTMATTER: frontmatter_file(configs["light"]),
+        FRONTMATTER: frontmatter(configs["light"]) + "\n",
         OUT / "preview.html": preview_html(sources, configs),
         OUT / "preview.md": preview_markdown(sources, configs["light"]),
     }

@@ -1,5 +1,3 @@
-# Generated from mermaid-light.json by scripts/render-diagramize-preview.py.
-# Copy the lines from the first --- to the last --- to the top of each Mermaid block.
 ---
 config:
   theme: "base"

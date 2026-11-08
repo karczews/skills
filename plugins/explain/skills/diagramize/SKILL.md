@@ -11,7 +11,7 @@ Draw a diagram in the form its destination can show. The caller, a skill or the 
 
 - Content: the parts, steps or states and their labels. Use the names you are given and spell them the same way. Keep annotations such as `path:line` and `(?)` where the caller put them. Add no parts, steps or labels the caller did not give you.
 - Destination: the terminal, a Markdown file, or an HTML page. With none given, use the terminal.
-- Kind: pick it in step 2 for the destination. When the caller names a kind from another column of that table, such as a state diagram in text for a Markdown file, draw the kind in the same row for this destination.
+- Kind: find the row of step 2 that fits the content, or that holds the kind the caller names, and draw the kind in this destination's column.
 
 When the user calls this skill directly, the text after the invocation names the subject, and may end with `in terminal`, `in html` or `to <file>.md` to name the destination. Read the code or files the subject points at, so the diagram carries real names.
 
@@ -171,13 +171,11 @@ Before and after table, for a fix:
 ## 4. Markdown file
 
 - Draw the kinds in the right column of step 2 as Mermaid blocks. Trees, pseudocode, tables, diffs and examples keep their terminal shapes.
-- Start each Mermaid block with the frontmatter in `references/mermaid-light-frontmatter.yaml`, next to this file: copy its lines from the first `---` to the last `---` unchanged. Every string in it is quoted, because YAML reads an unquoted `#dbeafe` as a comment, and Mermaid then draws its default colour without an error. A Markdown block cannot follow the viewer's colour scheme, so this light config puts text on light fills, or in a mid blue that reads on light and dark pages:
+- Start each Mermaid block with the contents of `references/mermaid-light-frontmatter.yaml`, next to this file, copied unchanged. A Markdown block cannot follow the viewer's colour scheme, so this light config puts text on light fills, or in a mid blue that reads on light and dark pages:
 
   ```text
   ---
   config:
-    theme: "base"
-    look: "classic"
     …                  # the rest of references/mermaid-light-frontmatter.yaml
   ---
   flowchart TD
@@ -250,7 +248,7 @@ out="$(mktemp -d)" && npx -y --prefer-offline @mermaid-js/mermaid-cli@12.2.0 -q 
 - Pass the whole Markdown file. The tool checks every block fenced with ```` ```mermaid ````, including blocks indented inside a list. For an HTML page, copy its Mermaid sources into a scratch `.md` file, each in a ```` ```mermaid ```` fence, and check that.
 - The check passes when the command succeeds and lists one `check-N.svg` for each Mermaid block you wrote. A block without its file went unseen, usually through a wrong fence, and is unchecked.
 - In a Markdown file, each `check-N.svg` also contains the frontmatter's `primaryColor`. Mermaid ignores a misread or misspelled config without an error, so a missing colour means the frontmatter did not apply.
-- When it fails, read the error. `Parse error on line N` points into a block, `YAMLException` into its frontmatter, and anything else at the tool, its folder or its browser.
+- When it fails, read the error. `Parse error on line N` points into a block, `YAMLException` into its frontmatter, and anything else at the tool or its browser.
 - The tool drives a Chrome browser. If it reports that it cannot find one, set `PUPPETEER_EXECUTABLE_PATH` to an installed Chrome, on macOS `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`.
 - If you cannot run the check, say that the diagrams are unchecked.
 
