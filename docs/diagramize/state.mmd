@@ -1,0 +1,9 @@
+stateDiagram-v2
+    [*] --> idle
+    idle --> running: start
+    running --> finished: done
+    running --> retrying: fail
+    retrying --> running: retry, up to 3
+    retrying --> failed: give up
+    finished --> [*]
+    failed --> [*]

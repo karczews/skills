@@ -1,0 +1,11 @@
+erDiagram
+    JOB ||--o{ ATTEMPT : has
+    JOB ||--o| RESULT : "produces one"
+    JOB {
+        string id
+        string state
+    }
+    ATTEMPT {
+        int number
+        string error
+    }

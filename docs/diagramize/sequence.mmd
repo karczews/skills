@@ -1,0 +1,12 @@
+sequenceDiagram
+    participant U as User
+    participant C as CLI
+    participant A as API
+    participant W as Worker
+    U->>C: run job
+    C->>A: POST /jobs
+    A->>W: enqueue
+    A-->>C: 202, id
+    C-->>U: id
+    W-xA: report failure
+    Note over A,W: the worker retries up to 3 times

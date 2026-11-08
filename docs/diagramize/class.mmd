@@ -1,0 +1,14 @@
+classDiagram
+    class Backend {
+        <<interface>>
+        +put(key, data) void
+        +get(key) bytes
+    }
+    class S3Backend {
+        -string bucket
+    }
+    class GcsBackend {
+        -string project
+    }
+    Backend <|.. S3Backend
+    Backend <|.. GcsBackend

@@ -1,6 +1,6 @@
 # skills
 
-Agent skills for [Claude Code](https://code.claude.com) and [OpenCode](https://opencode.ai). Each skill is its own plugin under `plugins/<name>/`, listed in `.claude-plugin/marketplace.json`.
+Agent skills for [Claude Code](https://code.claude.com) and [OpenCode](https://opencode.ai). Each plugin lives under `plugins/<name>/` and is listed in `.claude-plugin/marketplace.json`. The `explain` plugin holds two skills, `explain` and `diagramize`.
 
 ## Installation
 
@@ -11,13 +11,16 @@ Claude Code, as a plugin:
 /plugin install explain@karczews-skills
 ```
 
+The plugin installs both `explain` and `diagramize`.
+
 Any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports, including OpenCode:
 
 ```bash
 npx skills add karczews/skills --skill explain -a opencode
+npx skills add karczews/skills --skill diagramize -a opencode
 ```
 
-Or copy `plugins/<name>/skills/<name>/` into `~/.config/opencode/skills/` (OpenCode) or `~/.claude/skills/` (both read it).
+Or copy each directory under `plugins/explain/skills/` into `~/.config/opencode/skills/` (OpenCode) or `~/.claude/skills/` (both read it). `explain` needs `diagramize` next to it.
 
 ## Available skills
 
@@ -33,11 +36,23 @@ It runs only when you ask for it:
 @explain how a request reaches the database           # OpenCode
 ```
 
-Ask a follow-up and it extends the previous diagram as a diff, in the same place as before. End the request with `in html` or `in terminal` to skip the question, or with `to docs` or `to <file>.md` to save the answer as markdown, with Mermaid diagrams.
+Ask a follow-up and it extends the previous diagram as a diff, in the same place as before. End the request with `in html` or `in terminal` to skip the question, or with `to docs` or `to <file>.md` to save the answer as markdown, with Mermaid diagrams. `diagramize` draws the diagrams.
+
+### diagramize
+
+Draws a diagram in the form the place it is read can show: plain text with box-drawing glyphs for a terminal, and Mermaid for a Markdown file or an HTML page. It picks the kind of diagram from what it has to show, quotes Mermaid labels so they parse, and checks every Mermaid block with `mermaid-cli` when it can. Mermaid colours live in `plugins/explain/skills/diagramize/references/`: `mermaid-light.json` for Markdown files and light HTML pages, `mermaid-dark.json` for dark HTML pages. [`docs/diagramize/preview.md`](docs/diagramize/preview.md) shows each kind as it appears in a Markdown file, and [`docs/diagramize/preview.html`](docs/diagramize/preview.html), opened in a browser, shows the exact look of HTML pages in light and dark mode. Both are regenerated whenever a config changes.
+
+`explain` calls it for every diagram. You can also call it yourself, and end the request with `in terminal`, `in html` or `to <file>.md`:
+
+```text
+/explain:diagramize the login flow in html   # Claude Code, plugin install
+/diagramize the login flow in html           # Claude Code, standalone skill
+@diagramize the login flow in html           # OpenCode
+```
 
 ## Adding a skill
 
-One skill per plugin, unless a plugin is meant to bundle several skills:
+One skill per plugin, unless a plugin is meant to bundle several skills, as `explain` bundles `diagramize`:
 
 ```text
 plugins/<name>/
@@ -45,7 +60,7 @@ plugins/<name>/
 └── skills/<name>/SKILL.md          # plus references/ if it needs them
 ```
 
-Add a matching entry to `.claude-plugin/marketplace.json` with `"source": "./plugins/<name>"`. Keep `name` the same in the directory, `plugin.json`, `SKILL.md` and the marketplace entry, and bump `version` in both manifests on every change. Check with:
+Add a matching entry to `.claude-plugin/marketplace.json` with `"source": "./plugins/<name>"`. Keep `name` the same in the directory, `plugin.json`, the main skill's `SKILL.md` and the marketplace entry, and bump `version` in both manifests on every change. Check with:
 
 ```bash
 claude plugin validate .

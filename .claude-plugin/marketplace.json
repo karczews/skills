@@ -12,15 +12,15 @@
   "plugins": [
     {
       "name": "explain",
-      "description": "Explain how code works with a short answer and a plain-text visual traced from the source: call tree, file tree, sequence diagram, diff, or an HTML page",
-      "version": "1.0.0",
+      "description": "Explain how code works with a short answer and a visual traced from the source, and draw diagrams for a terminal, a Markdown file or an HTML page",
+      "version": "2.0.0",
       "author": {
         "name": "Krzysztof Karczewski",
         "email": "kr.karczewski@gmail.com"
       },
       "source": "./plugins/explain",
       "category": "productivity",
-      "keywords": ["explain", "visualization", "diagrams", "call-tree", "code"]
+      "keywords": ["explain", "visualization", "diagrams", "mermaid", "call-tree", "code"]
     }
   ]
 }

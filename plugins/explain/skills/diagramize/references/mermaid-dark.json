@@ -1,0 +1,16 @@
+{
+  "theme": "base",
+  "look": "classic",
+  "themeVariables": {
+    "darkMode": true,
+    "primaryColor": "#1e3a5f",
+    "primaryBorderColor": "#7fb2ff",
+    "primaryTextColor": "#e6efff",
+    "lineColor": "#7fb2ff",
+    "textColor": "#e6efff",
+    "edgeLabelBackground": "#1e3a5f",
+    "signalTextColor": "#3b82f6",
+    "signalColor": "#7fb2ff"
+  },
+  "themeCSS": ".labelBkg { background-color: #1e3a5f; }"
+}

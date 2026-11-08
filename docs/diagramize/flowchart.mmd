@@ -1,0 +1,8 @@
+flowchart TD
+    A(["request arrives"]) --> B{"token expired?"}
+    B -->|"no"| E["forward request"]
+    B -->|"yes"| C["refresh token (new)"]
+    C --> D{"refresh ok?"}
+    D -->|"yes"| E
+    D -->|"no"| F(["return 401"])
+    E --> S[("session store")]

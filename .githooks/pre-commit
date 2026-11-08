@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Regenerate docs/diagramize/preview.html and preview.md when a diagramize Mermaid config or a
+# preview source changes, so the committed page always shows the current look.
+set -euo pipefail
+
+watched='^(plugins/explain/skills/diagramize/references/mermaid-(light|dark)\.json|docs/diagramize/[^/]+\.mmd|scripts/render-diagramize-preview\.py)$'
+
+if git diff --cached --name-only | grep -Eq "$watched"; then
+  echo "pre-commit: diagramize settings changed, regenerating docs/diagramize/preview.html and preview.md"
+  if ! python3 scripts/render-diagramize-preview.py; then
+    echo "pre-commit: failed; fix it or run scripts/render-diagramize-preview.py by hand" >&2
+    exit 1
+  fi
+  git add docs/diagramize/preview.html docs/diagramize/preview.md
+fi
