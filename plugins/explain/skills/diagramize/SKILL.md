@@ -9,7 +9,7 @@ Draw a diagram in the form its destination can show. The caller, a skill or the 
 
 ## 1. Inputs
 
-- Content: the parts, steps or states and their labels. Use the names you are given and spell them the same way. Keep annotations such as `path:line` and `(?)` where the caller put them. Add no parts, steps or labels the caller did not give you.
+- Content: the parts, steps or states and their labels. Use the names you are given and spell them the same way. Keep annotations such as `path:line` and `(?)` where the caller put them. Add no parts, steps or labels the caller did not give you, except the UI details step 5 reads from the code.
 - Destination: the terminal, a Markdown file, or an HTML page. With none given, use the terminal.
 - Kind: find the row of step 2 that fits the content, or that holds the kind the caller names, and draw the kind in this destination's column.
 
