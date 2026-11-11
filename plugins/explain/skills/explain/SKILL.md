@@ -54,7 +54,7 @@ For the terminal, write the reply as in step 5. For HTML, build the page as in s
 
 The reply is, in order:
 
-1. The answer, in one or two sentences. They say what happens or where it lives; the visual shows how. Steps, formulas and lists of parts go in the visual, never in these sentences. For a change, the first sentence says how it worked before and why the change was needed, naming the failure only for a bug fix; the second says how it works after and what stays the same.
+1. The answer, in one or two sentences. They say what happens or where it lives; the visual shows how. Steps, formulas and lists of parts go in the visual, never in these sentences. For a change, the first sentence says how it worked before and, only when the evidence shows it, why the change was needed, naming the failure only for a bug fix; the second says how it works after and what stays the same.
 2. The visual, drawn by `diagramize` for the terminal. One by default; up to three when the question has separate parts, each with a one-line lead. A before and after pair counts as one visual. When the change is too large for one visual, explain the part the question asks about and name what was left out, as the terminal rules do with `…`.
 3. At most three lines on what to notice, or the open decision. For a change, use the lines for what the tests cover, what stays unverified, and the open decision.
 
