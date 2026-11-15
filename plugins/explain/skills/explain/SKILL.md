@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # explain
 
-Answer with one or two sentences and visuals sized to the question: one by default, up to three when the question has separate parts (a before/after pair counts as one). Names come from code you read, not from memory. The `diagramize` skill draws every visual: load it before step 3. Both ship in this plugin, so a plugin install needs nothing more. With a manual copy, `diagramize` must sit next to this skill: if unavailable, tell the user and stop.
+Answer with one or two sentences and visuals sized to the question: one by default, up to three when the question has separate parts (a before/after pair counts as one). Names come from code you read, not from memory. The `diagramize` skill draws every visual: load it before step 3. If unavailable, flag it and stop.
 
 ## 1. Find the topic
 
