@@ -1,87 +1,65 @@
 ---
 name: explain
-description: Explain a topic with a short answer and a diagram traced from the code, in the terminal or on an HTML page
+description: Explain how code works or what a change did, with a short answer and a diagram traced from the source, in the terminal, a Markdown file, or on an HTML page
 disable-model-invocation: true
 ---
 
 # explain
 
-Answer with at most two sentences and one visual sized to the question, in the terminal or on an HTML page. Names in a visual come from code you read, not from memory. The `diagramize` skill draws every diagram: load it before step 3. It ships in the same plugin as this skill. If it is not available, tell the user to install it next to this skill, and stop.
+Answer with one or two sentences and visuals sized to the question: one by default, up to three when the question has separate parts (a before/after pair counts as one). Names come from code you read, not from memory. The `diagramize` skill draws every visual: load it before step 3. Both ship in this plugin, so a plugin install needs nothing more. With a manual copy, `diagramize` must sit next to this skill: if unavailable, tell the user and stop.
 
 ## 1. Find the topic
 
-- Text after the invocation (`/explain retry logic`, `@explain retry logic`) is the topic.
+- Text after the invocation (`/explain:explain`, `/explain`, `@explain`) is the topic.
 - With no text, the topic is the question currently open in the conversation.
 - With neither, ask the user what to explain, and stop.
-- Text that ends in `to <file>.md` or `to docs` is a request to save the answer; the rest is the topic. See step 7.
-- Text that ends in `in html` or `in terminal` says where to show the answer; the rest is the topic. See step 4.
+- Strip at most one destination suffix (`in html`, `in terminal`) and at most one save suffix (`to <file>.md`, `to <file>.html`, `to docs`) in either order. Match case-insensitively at the very end only; the rest is the topic. Never strip mid-sentence matches.
+- `to docs` and `to <file>.md` request a Markdown save (step 7); `to <file>.html` requests an HTML save at that path. `in html` / `in terminal` request a place (step 4). Slug: lowercase topic, non-alphanumerics to `-`, max 8 tokens.
 
 ## 2. Read before you draw
 
-When the topic involves code, open the files it touches and trace the path you are about to draw. When that path spans many files and you can start a subagent, give it the search: ask for the entry point and the path through the code with `path:line` for each step. Then open the lines you will cite and check them before drawing.
+When the topic involves code, open the files it touches and trace the path you are about to draw. When that path spans many files and subagents exist, delegate the trace, then verify cited lines yourself.
 
-When the topic is a change, read the change, not just the files: the diff or the two versions, the text that announced it (commit message, PR description, linked issue), and the tests that cover the changed path. Describe the before state from the old version, or the missing capability when the change is additive, and the after state from the new version. Find the callers of the changed names. They say who is affected and what stays the same.
+For a change, read the diff (both versions), its announcement (commit/PR/issue), covering tests, and callers of changed names.
 
-What goes into the visual:
-
-- Symbols and paths spelled exactly as the code does.
-- `path:line` on the entry point and on the nodes that answer the question.
-- `(?)` on a step you inferred but did not trace (dynamic dispatch, config lookup, reflection, generated code, a network hop), with one line on why it is unverified.
-- Names that do not exist yet only as `+` lines in a diff.
+What goes into the visual: symbols and paths spelled as in code, with caller annotations kept as `diagramize` §1 defines them (`path:line`, `(?)`). Names that do not exist yet only as `+` lines in a diff.
 
 ## 3. Pick the visual
 
-- For the exact code to write, the visual is the full code block. Write the code out in full when the change is mostly new, or when a diff's missing lines would leave the reader unsure where it goes.
-- For everything else, find the row of `diagramize`'s "Pick the kind" table that matches what the question asks. `diagramize` draws that row's kind for wherever the answer goes. When the Terminal shape would not fit the terminal limits, step 4 recommends the HTML page.
-- For a change that does not ask for the exact code to write, the visual is `diagramize`'s before and after. Draw both sides in the same kind, and mark new or changed parts `(new)`. When the change spans modules, pair the before and after with a file tree diff, or name in a note line the parts the visual left out.
+- For the exact code to write, the visual is the full code block, only when a diff's missing lines would hide where it goes.
+- Otherwise tell `diagramize` what the question asks; it picks the kind from its table and draws it for the destination. When the terminal shape would overflow, step 4 recommends HTML.
+- For a change that does not ask for exact code, the visual is `diagramize`'s before and after in the same kind, marked per its §3 conventions. When the change spans modules, pair it with a file tree diff or name the omitted parts in one note line.
 
 ## 4. Ask where to show it
 
-Once you know what the answer holds, and before you write it, ask the user whether to show it in the terminal or on an HTML page. Offer the two as choices, with the harness's tool for asking the user a question when it has one, and mark one as recommended:
+Once you know what the answer holds and before you write it, ask terminal vs HTML and mark one recommended:
 
-- HTML page, when the explanation is big: it needs more than one visual, a visual that does not fit the limits in `diagramize`'s "Terminal" section, or a kind that only an HTML page can show.
-- Terminal, otherwise.
+- HTML page, when it needs more than three parts, overflows `diagramize`'s terminal limits (20 lines, 80 columns), or is an HTML-only kind (UI, dense graph).
+- Terminal, otherwise (handles one to three visuals that fit).
 
-Skip the question in these cases:
+Skip the question and use that place instead when the topic named it (`in html`, `in terminal`, `to <file>.md`, `to <file>.html`, `to docs`), when it is a follow-up (reuse the previous place unless renamed), or when the harness cannot ask (use the recommended choice). AskUserQuestion where available, otherwise a plain two-option question; if non-interactive, use the recommended without asking.
 
-- The topic named the place (`in html`, `in terminal`), or asked to save to a file (step 7). Use that.
-- The question is a follow-up (step 6). Use the place the previous reply went to, unless the user names another.
-- The harness cannot ask the user. Use the recommended choice.
+For the terminal write the reply as in step 5. For HTML build the page as in step 8.
 
-For the terminal, write the reply as in step 5. For HTML, build the page as in step 8.
-
-## 5. Write the reply
+## 5. Write the reply (terminal)
 
 The reply is, in order:
 
-1. The answer, in one or two sentences. They say what happens or where it lives; the visual shows how. Steps, formulas and lists of parts go in the visual, never in these sentences. For a change, the first sentence says how it worked before and, only when the evidence shows it, why the change was needed, naming the failure only for a bug fix; the second says how it works after and what stays the same.
-2. The visual, drawn by `diagramize` for the terminal. One by default; up to three when the question has separate parts, each with a one-line lead. A before and after pair counts as one visual. When the change is too large for one visual, explain the part the question asks about and name what was left out, as the terminal rules do with `…`.
-3. At most three lines on what to notice, or the open decision. For a change, use the lines for what the tests cover, what stays unverified, and the open decision.
+1. The answer in 1-2 sentences (before → after for a change). Steps and parts go in the visual, never here.
+2. One visual (up to three for separate parts, each with a one-line lead). Explain the asked part and name what was left out when too large for one visual.
+3. At most three notice lines (for a change: tests covered, what stays unverified, open decision).
 
 ### Prose
 
-These rules cover the answer, the notes, saved files and the HTML page. Visuals keep their compact notation.
+These cover the answer, notes, saved files and HTML page. Visuals keep compact notation.
 
-- Name the mechanism: which function calls which, what value it returns, what fails and how. A sentence that could appear unchanged in another project's docs says nothing about this one. Cut it.
-- Name the actor. Write "the loader parses the file", not "the file is parsed". Use the passive only when nothing in the code does the action.
-- Put one idea in each sentence. Write whole sentences with articles and verbs. Arrows, symbols and abbreviations belong in the visual.
-- Call each thing by its name in the code, and keep using that name.
-- Prefer plain words: use, help, many, if, is, has.
-- Prefer concrete nouns to metaphors. Avoid surface, vector, primitive, paradigm, substrate, scaffolding, flywheel.
-- Replace an adverb with a number or a stronger verb: "cuts startup from 2 s to 300 ms", not "significantly improves startup".
-- Hedge once, and only where you are unsure. Mark unverified code paths with `(?)` instead of softening the sentence.
-- List as many items as there are. Groups of three, "not just X but Y" and trailing "-ing" clauses ("…, ensuring reliability") pad the point.
-- Punctuate with periods and commas. No em dashes. Use a colon only before a list or an example. No bold labels and no emoji.
+- Name the mechanism and the actor: which function calls which, what it returns, what fails and how. Write "the loader parses the file", not "the file is parsed".
+- Call each thing by its code name, and keep using it. Prefer plain, measured words with numbers over adverbs and metaphors.
+- Mark unverified paths with `(?)` instead of hedging the sentence. Hedge once, only where unsure.
 - Start with the answer and end after the last note. No greeting, praise, summary line or offer of more help.
 
-## 6. Follow-ups
+## 6. Follow-ups, save, HTML page
 
-When your previous reply in this conversation drew a visual and the new question extends it ("and on failure?", "where does the token come from?"), have `diagramize` extend that visual, as its "Extend a diagram" section says.
-
-## 7. Save to a file
-
-When the topic asked to save the answer (step 1), write it to the named file, or to `docs/explain/<topic-slug>.md` for `to docs`. The file holds the same answer and notes, with the visuals drawn by `diagramize` for a Markdown file. Reply with the two-sentence answer and the file path.
-
-## 8. HTML page
-
-When the answer goes to an HTML page (step 4), have `diagramize` build the page for the visuals, and hand it the answer and the notes to place around them. The page holds the whole explanation. Write it to `${TMPDIR:-/tmp}/explain/<topic-slug>.html`. Reply with the two-sentence answer and the file path.
+- Follow-up: when the new question extends the previous visual, have `diagramize` extend it per its §8, for the same place.
+- Save: write to the named file, or to `<cwd>/docs/explain/<topic-slug>.md` for `to docs` (relative to the working directory, never into the skills install). The file holds answer, notes and Markdown visuals; reply with the two-sentence answer and the absolute path.
+- HTML page: have `diagramize` build it from its `references/page-template.html`, handing it the answer and notes to place around the visuals. Always pass the explicit path `${TMPDIR:-/tmp}/explain/<topic-slug>.html` (or the `to <file>.html` path); `diagramize` writes there, opens it and hands the path back. Reply with the two-sentence answer and the path.

@@ -1,0 +1,44 @@
+<!doctype html>
+<!-- Base for diagramize HTML pages. Copy this file, then replace the marked spots. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><!-- TITLE: topic slug --></title>
+<style>
+  body { margin: 0 auto; max-width: 960px; padding: 24px 16px; background: #ffffff; color: #1f2937; font: 15px/1.5 system-ui, sans-serif; }
+  pre.mermaid { margin: 16px 0; text-align: center; overflow-x: auto; }
+  pre.mermaid svg { max-width: 100%; height: auto; }
+  pre.text { background: #f3f4f6; padding: 12px; overflow-x: auto; }
+  table { border-collapse: collapse; margin: 16px 0; }
+  th, td { border: 1px solid #d1d5db; padding: 6px 10px; text-align: left; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0d1117; color: #e6edf3; }
+    pre.text { background: #161b22; }
+    th, td { border-color: #30363d; }
+  }
+</style>
+</head>
+<body>
+<main>
+<!-- ANSWER AND NOTES: paste caller text here unchanged, HTML-escaped except intended tags -->
+<!-- DIAGRAMS: one <pre class="mermaid"> per Mermaid diagram (source HTML-escaped), or <pre class="text"> for trees/pseudocode/diffs, or <table> for comparison/before-after tables -->
+</main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js"></script>
+<script>
+  const configs = {
+    light: /* PASTE references/mermaid-light.json */,
+    dark: /* PASTE references/mermaid-dark.json */,
+  };
+  (async () => {
+    let n = 0;
+    for (const el of document.querySelectorAll("pre.mermaid")) {
+      mermaid.initialize({ startOnLoad: false, deterministicIds: true, ...configs[matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"] });
+      const { svg } = await mermaid.render(`diagram-${n++}`, el.textContent);
+      el.innerHTML = svg;
+    }
+  })();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => location.reload());
+</script>
+</body>
+</html>

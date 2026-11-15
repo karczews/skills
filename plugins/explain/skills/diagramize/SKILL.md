@@ -1,19 +1,19 @@
 ---
 name: diagramize
-description: Draw a diagram in the form the place it is read can show, plain text for a terminal and Mermaid for a Markdown file or an HTML page. Use when a skill or the user needs a diagram drawn for one of those places.
+description: Draw a diagram in the form the place it is read can show, plain text for a terminal and Mermaid or plain text for a Markdown file or an HTML page. Use when a skill or the user needs a diagram drawn for one of those places.
 ---
 
 # diagramize
 
-Draw a diagram in the form its destination can show. The caller, a skill or the user, decides what the diagram holds and where it goes. This skill picks the kind and draws it.
+The caller (a skill or the user) decides what the diagram holds and where it goes. This skill picks the kind and draws it. Configs live beside this file in `references/`: always read them, never reconstruct from memory.
 
 ## 1. Inputs
 
-- Content: the parts, steps or states and their labels. Use the names you are given and spell them the same way. Keep annotations such as `path:line` and `(?)` where the caller put them. Add no parts, steps or labels the caller did not give you, except the UI details step 5 reads from the code.
-- Destination: the terminal, a Markdown file, or an HTML page. With none given, use the terminal.
-- Kind: find the row of step 2 that fits the content, or that holds the kind the caller names, and draw the kind in this destination's column.
+- Content: parts, steps or states and their labels. Use given names verbatim; keep `path:line` and `(?)` where the caller put them. Add nothing except UI details step 5 reads from code.
+- Destination: terminal, Markdown file, or HTML page. Direct call with none given uses the terminal; a caller-given destination always wins.
+- Kind: the row of step 2 fitting the content, or the kind the caller names.
 
-When the user calls this skill directly, the text after the invocation names the subject, and may end with `in terminal`, `in html` or `to <file>.md` to name the destination. Read the code or files the subject points at, so the diagram carries real names.
+Direct call: text after the invocation names the subject; a trailing `in terminal`, `in html`, `to <file>.md` or `to <file>.html` names the destination (`to docs` is `explain`-only). Suffixes match case-insensitively at the very end only. Read the subject's code so the diagram carries real names; do not invent parts the code does not show.
 
 ## 2. Pick the kind
 
@@ -31,16 +31,11 @@ When the user calls this skill directly, the text after the invocation names the
 | what changes, or what would change                   | before and after (step 3)   | before and after, in the same kinds |
 | how a UI looks, or a graph too dense for text        | does not fit, say so        | HTML page only (step 5)             |
 
-A chain with no branch, no fan-out, no loop and a single actor stays text in every destination. A Mermaid block for it is a sentence in boxes.
+A chain with no branch, fan-out, loop and a single actor stays text in every destination; this overrides the Mermaid column. A Mermaid block for it would be a sentence in boxes.
 
 ## 3. Terminal
 
-The terminal shows Mermaid as source, so draw with indentation, box-drawing glyphs and arrows, in a `text`, `diff` or `jsonc` block or a Markdown table.
-
-- Stay within 20 lines and 80 columns. Replace omitted branches with `…` and name what was left out.
-- When the content cannot fit, such as a UI or a graph too dense for text, say so to the caller and suggest an HTML page.
-
-### Shapes
+The terminal shows Mermaid as source: use `text`, `diff`, `jsonc` blocks or Markdown tables, ≤20 lines × 80 cols. Cut branches to `…` and name omissions. When it cannot fit, say so and suggest HTML.
 
 Call tree:
 
@@ -50,17 +45,6 @@ handleUpload                  api/upload.go:31
   storeBlob
     pickBackend (?)           # backend chosen from config at runtime
   enqueueThumbnail
-```
-
-Pseudocode:
-
-```text
-on request
-  if token has expired
-    refresh token
-    if refresh fails
-      return 401
-  forward request
 ```
 
 Sequence diagram in text:
@@ -74,61 +58,13 @@ User          CLI            API
  │◀─── id ─────│              │
 ```
 
-State diagram in text:
+Other shapes follow the same density; see `docs/diagramize/preview.md` for glyphs. Pseudocode nests with two-space indent; state moves use `──label──▶`; file/structure trees use `├──`/`└──`; examples come from a fixture, log line or literal with a comment per unclear field; tables have one option per column, one separating criterion per row.
 
-```text
-idle ──start──▶ running ──done──▶ finished
-                 │  ▲
-            fail │  │ retry, up to 3
-                 ▼  │
-               retrying ──give up──▶ failed
-```
+Before and after (combined ≤20 lines). Pick the form that stays readable:
 
-File tree:
-
-```text
-internal/
-├── auth/         # tokens and sessions
-├── billing/      # invoices, talks to the payment provider
-└── storage/      # blob backends
-```
-
-Structure tree:
-
-```text
-CheckoutScreen                ui/checkout/CheckoutScreen.kt:18
-  CheckoutViewModel           # holds cart and payment state
-  CartSummary
-    PriceRow                  ui/components/PriceRow.kt
-```
-
-Example data, taken from a test fixture, a log line or a literal in the code, with a comment on each field that needs one:
-
-```jsonc
-{
-  "id": "job_8f2c",        // IdGenerator, never reused
-  "state": "retrying",     // one of the states in JobState
-  "attempt": 2,            // starts at 1
-  "lastError": "timeout"   // null unless retrying or failed
-}
-```
-
-Comparison table, one column per option, one row per criterion that separates them:
-
-| | Polling | Webhooks | Queue |
-|---|---|---|---|
-| Setup | none | public URL | broker to run |
-| Latency | up to 30 s | under 1 s | under 1 s |
-| Lost events | none | while the receiver is down | none |
-| Code touched | `sync/poll.go` | `api/hooks.go` | new worker |
-
-Before and after, for a change that was made or is proposed. Pick the form that keeps both states readable:
-
-- A `diff` of the shape, when the change adds or removes parts and leaves the rest in place.
-- Two visuals of the same kind, led by `Before` and `After`, when the change reorders steps or swaps actors, so a diff would be mostly `-` and `+` lines. In a tree or pseudocode pair, prefix lines in `After` with `+` for added and `~` for changed. Removed lines appear only in `Before`. The pair stays within 20 lines.
-- A table with `Before` and `After` columns and one row per behaviour that changes, when the change is about what happens rather than where the code lives. For a fix, mark the broken behaviour with `✗` and what replaces it with `✓`.
-
-Diff, keeping the shape the reader already knows:
+- A `diff` of the shape when the change adds/removes parts and leaves the rest.
+- `Before`/`After` visuals of the same kind when it reorders steps or swaps actors. In a text pair, `After` prefixes added lines `+` and changed lines `~`; removed lines appear only in `Before`.
+- A `Before`/`After`-column table when it is about behaviour, not location. For a fix mark broken `✗` and replacement `✓`.
 
 ```diff
  internal/
@@ -137,129 +73,56 @@ Diff, keeping the shape the reader already knows:
  └── storage/
 -    └── s3.go
 +    ├── backend.go    # common interface
-+    ├── s3.go
 +    └── gcs.go
 ```
 
-Before and after pair, where a diff would rewrite every line:
-
-```text
-Before
-CLI            API
- │  POST /jobs  │
- │─────────────▶│  runs the job, about 40 s
- │◀──── 200 ────│
-
-After
-CLI            API          Worker
- │  POST /jobs  │              │
- │─────────────▶│── enqueue ──▶│
- │◀── 202, id ──│              │  runs the job
- │ GET /jobs/id │              │
- │─────────────▶│              │
- │◀─── done ────│              │
-```
-
-Before and after table, for a fix:
-
-| | Before | After |
-|---|---|---|
-| Expired token | ✗ caller gets 401 | ✓ refreshed once, request retried |
-| Refresh fails | no refresh attempted | caller gets 401 |
-| Requests per call | 1 | up to 2 |
-
 ## 4. Markdown file
 
-- Draw the kinds in the right column of step 2 as Mermaid blocks. Trees, pseudocode, tables, diffs and examples keep their terminal shapes.
-- Start each Mermaid block with the contents of `references/mermaid-light-frontmatter.yaml`, next to this file, copied unchanged. A Markdown block cannot follow the viewer's colour scheme, so this light config puts text on light fills, or in a mid blue that reads on light and dark pages:
+- Draw the right-column kinds as Mermaid blocks; trees, pseudocode, tables, diffs and examples keep terminal shapes.
+- Start each Mermaid block with `references/mermaid-light-frontmatter.yaml` (in `references/` next to `SKILL.md`'s directory), copied unchanged:
 
-  ```text
+  ```mermaid
   ---
   config:
-    …                  # the rest of references/mermaid-light-frontmatter.yaml
+    …                  # the rest of mermaid-light-frontmatter.yaml
   ---
   flowchart TD
     …
   ```
 
-- Under each Mermaid block, write one line that says what the diagram shows. Terminal tools, email and many mobile apps show the block as source, and that line is what their readers get.
-- Follow the Mermaid rules in step 6 and check the file as step 7 says.
+- One caption line under each Mermaid block (fallback for source-only viewers).
+- Follow step 6 and check per step 7.
 
 ## 5. HTML page
 
-- One self-contained file with inline CSS and JS that follows the viewer's colour scheme, also when it changes while the page is open. Put each diagram's source in a `<pre class="mermaid">`, and end the body with this script, with the contents of `references/mermaid-light.json` and `references/mermaid-dark.json` pasted in place of the two comments. A page opened from disk cannot fetch files next to it.
-
-  ```html
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@12.2.0/dist/mermaid.min.js"></script>
-  <script>
-    const configs = {
-      light: /* references/mermaid-light.json */,
-      dark: /* references/mermaid-dark.json */,
-    };
-    const scheme = matchMedia("(prefers-color-scheme: dark)");
-    const blocks = [...document.querySelectorAll("pre.mermaid")];
-    const sources = blocks.map((el) => el.innerHTML);
-    async function draw() {
-      mermaid.initialize({ startOnLoad: false, deterministicIds: true, ...configs[scheme.matches ? "dark" : "light"] });
-      blocks.forEach((el, i) => { el.innerHTML = sources[i]; el.removeAttribute("data-processed"); });
-      await mermaid.run({ nodes: blocks });
-    }
-    scheme.addEventListener("change", draw);
-    draw();
-  </script>
-  ```
-
-  Mermaid replaces each source with its drawing, so the script keeps the sources and draws again when the scheme changes. Without `deterministicIds`, diagrams drawn in the same millisecond get the same id and land on top of each other.
-- Give the page a matching background, `#ffffff` for light and `#0d1117` for dark, with `@media (prefers-color-scheme: dark)`.
-- The 20-line and 80-column limits do not apply. Draw the whole path instead of cutting branches to `…`.
-- Draw the kinds in the right column of step 2 as Mermaid. Trees, pseudocode and examples go in `<pre>` blocks; tables become HTML tables.
-- When the caller hands you text for the page, such as an answer or notes, put it around the diagrams unchanged.
-- For a UI, draw the screens from the real code: actual labels, values and states, with the colours, fonts and component names of the project's theme or design system. Read that code yourself when the caller did not hand you those details. For a UI change, show the before and after screens side by side, stacked on a narrow window. Mermaid diagrams keep the configs from `references/`.
-- Check that the page fits a narrow window.
-- Write it to the path the caller gives, or to `${TMPDIR:-/tmp}/diagramize/<topic-slug>.html`, outside the repository.
-- Follow the Mermaid rules in step 6 and check the diagrams as step 7 says.
-- Open the page with `open` on macOS or `xdg-open` on Linux. If your harness has a tool that shows HTML to the user, use that instead. Hand the path back to the caller.
+- Build from `references/page-template.html` (next to this file in `references/`). Paste the answer/notes around the diagrams unchanged, and the two `references/mermaid-*.json` configs where marked. Never fetch files at runtime; a page opened from disk cannot load siblings.
+- HTML-escape every diagram source inside `<pre>` (as the generator does with `html.escape()`). Read sources back with `textContent`, never `innerHTML`, so `<`, `<<interface>>` and `-->` survive.
+- Mermaid kinds go in `<pre class="mermaid">`; trees, pseudocode, diffs and examples in `<pre class="text">`; comparison and before/after tables as HTML `<table>`. Mermaid blocks keep the `references/` configs. No 20-line limit: draw the whole path instead of cutting to `…`, but still split when it answers more than one question.
+- For a UI use real labels, values, states, colours, fonts and component names from the project's theme; read that code when the caller did not hand it over. For a UI change show before/after side by side, stacked on narrow windows. Fit a narrow window.
+- Write to the caller's path; only for a direct call default to `${TMPDIR:-/tmp}/diagramize/<topic-slug>.html`, outside the repo. Follow step 6 and check per step 7. Open with `open` (macOS) / `xdg-open` (Linux), or the harness HTML viewer when it has one. Hand the path back to the caller.
 
 ## 6. Mermaid rules
 
-One broken label turns a whole block into an error message, so:
+One broken label turns a block into an error; for full syntax see https://mermaid.js.org. Project rules:
 
-- Quote the labels of a `flowchart` and of `erDiagram` relationships: `A["parse(file)"]`, `-->|"on timeout"|`, `JOB ||--o{ ATTEMPT : "has many"`. Unquoted brackets, parentheses and colons break a flowchart, and an unquoted ER label with spaces falls apart.
-- Write every other label bare: sequence messages, notes and participant names, state transitions, class members and class relations. Quote marks there show up as text. Bare labels hold brackets, parentheses and colons, except a class relation label, which takes `#58;` for a colon. A state name with spaces is declared as `state "Waiting for token" as waiting`; those quotes are syntax.
-- In every label, write `#59;` for `;`, `#35;` for `#` and `#lt;` for `<`, and inside a quoted label `#quot;` for a double quote. A bare `;` ends the line, a `#` can swallow the text after it, and Mermaid reads `<` as the start of an HTML tag.
-- Break a line inside a label with `<br/>`.
-- Write `End`, not `end`, as a flowchart label. Lowercase `end` closes a block.
-- Start comments with `%%` at the beginning of a line, and keep braces out of them.
-- Give each node shape one meaning: `["step"]`, `{"decision"}`, `(["start or end"])`, `[("store")]`. Draw a boundary, such as a process or a permission scope, as a `subgraph`.
-- In a `sequenceDiagram`, `->>` is a call, `-->>` a return and `-x` a failed call. Put the reason for an ordering in a `Note over A,B:`.
-- Keep a diagram to about a dozen nodes. More means it answers more than one question; split it.
-- Mark new or changed parts with a label such as `(new)`. Colour alone is lost on readers who cannot see it and in some themes.
-- Use only the types in step 2. Newer types carry exact keywords, such as `architecture-beta`, and many viewers cannot draw them; a `flowchart` with `subgraph` boundaries carries the same information.
-- Put links in the text next to the diagram. Viewers that render untrusted Markdown turn off `click` links.
+- Quote `flowchart` and `erDiagram` relationship labels (`A["parse(file)"]`, `-->|"on timeout"|`, `JOB ||--o{ ATTEMPT : "has many"`); leave sequence/state/class labels bare (quotes show as text). Bare labels hold brackets and parentheses; a class-relation colon is `#58;`. Declare spaced state names as `state "Waiting for token" as waiting`.
+- Escape in every label: `#59;` for `;`, `#35;` for `#`, `#lt;` for `<`, `#quot;` for `"` inside quoted labels. Break lines with `<br/>`.
+- Write `End`, not `end`; start comments with `%%` at line start. Node shapes: `["step"]`, `{"decision"}`, `(["start/end"])`, `[("store")]`; boundaries as `subgraph`. Sequence: `->>` call, `-->>` return, `-x` failed; ordering reasons in `Note over A,B:`.
+- Keep ~dozen nodes; split when it answers more than one question. Mark new parts `(new)`, never colour alone. Only step-2 types; no `architecture-beta`, no `click` links (strict viewers disable them); put links beside the diagram.
 
 ## 7. Check that it renders
 
-When you can run `npx`, check every Mermaid block in a Markdown file or an HTML page before you hand the result back. Run this as one command, with the file's absolute path in place of `FILE.md`:
+When `npx` exists, check every Mermaid block before handing back. One command, absolute path for `FILE.md`:
 
 ```bash
 out="$(mktemp -d)" && (cd "$out" && npx -y --prefer-offline -p puppeteer@25 -p @mermaid-js/mermaid-cli@12.2.0 mmdc -q -i "FILE.md" -o "$out/check.md") && ls "$out"
 ```
 
-- The command names `puppeteer@25` because mermaid-cli lists it only as a peer dependency, which npm leaves out under `legacy-peer-deps`. It runs `npx` from the empty folder so that npx installs both packages together instead of reusing a mermaid-cli the project already has.
-- Pass the whole Markdown file. The tool checks every block fenced with ```` ```mermaid ````, including blocks indented inside a list. For an HTML page, copy its Mermaid sources into a scratch `.md` file, each in a ```` ```mermaid ```` fence, and check that.
-- The check passes when the command succeeds and lists one `check-N.svg` for each Mermaid block you wrote. A block without its file went unseen, usually through a wrong fence, and is unchecked.
-- In a Markdown file, each `check-N.svg` also contains the frontmatter's `primaryColor`. Mermaid ignores a misread or misspelled config without an error, so a missing colour means the frontmatter did not apply.
-- When it fails, read the error. `Parse error on line N` points into a block, `YAMLException` into its frontmatter, and anything else at the tool or its browser.
-- The tool drives a Chrome browser, and on the first run puppeteer downloads its own copy, several hundred MB. When Chrome is installed, start the `npx` part with `PUPPETEER_SKIP_DOWNLOAD=1 PUPPETEER_EXECUTABLE_PATH="<path to Chrome>"` to use it instead; on macOS the path is `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. Set the path the same way when the tool reports that it cannot find a browser.
-- If you cannot run the check, say that the diagrams are unchecked.
-
-Each viewer draws Markdown diagrams with its own Mermaid version, so details can differ from the HTML page. To see which version a viewer runs, render a Mermaid block that holds only the word `info`.
+- Pass the whole Markdown file (checks every ```` ```mermaid ```` fence, including indented ones). For HTML, copy sources into a scratch `.md` with one ```` ```mermaid ```` fence each and check that.
+- Pass is exit 0 plus one `check-N.svg` per block; a missing file means an unchecked block (usually a wrong fence). Each SVG must contain the frontmatter's `primaryColor`; Mermaid ignores misread configs silently.
+- On failure: `Parse error` points into a block, `YAMLException` into frontmatter, else the tool/browser. No Chrome download when installed: prefix `npx` with `PUPPETEER_SKIP_DOWNLOAD=1 PUPPETEER_EXECUTABLE_PATH="<path to Chrome>"` (macOS: `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`).
+- If you cannot run it, say the diagrams are unchecked. Viewers use their own Mermaid version; render a block holding only `info` to see it.
 
 ## 8. Extend a diagram
 
-When the caller extends a diagram drawn earlier in the conversation ("and on failure?", "where does the token come from?"), draw that same diagram again with the new part, for the same destination:
-
-- A text shape, such as a tree, pseudocode or a text sequence diagram: a `diff` that adds the new part.
-- A Mermaid diagram: the whole diagram again, with each new node, message or edge labelled `(new)`. A `diff` of Mermaid source shows code, not a diagram.
-
-Start a fresh diagram only when the new content needs a different kind.
+Redraw the same diagram with the new part, same destination: text shapes as a `diff` adding it; Mermaid as the whole diagram again with each new node/message/edge labelled `(new)`. Fresh diagram only when the content needs a different kind.

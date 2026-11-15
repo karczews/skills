@@ -2,7 +2,7 @@
 
 This repo is a Claude Code plugin marketplace whose skills must also work in OpenCode.
 
-- Each skill is its own plugin at `plugins/<name>/`, with `.claude-plugin/plugin.json` and `skills/<name>/SKILL.md`. Put several skills in one plugin only when the user asks for it.
+- One skill per plugin at `plugins/<name>/`, with `.claude-plugin/plugin.json` and `skills/<name>/SKILL.md`. Bundle skills in one plugin when one cannot run without the other (as `explain` bundles its `diagramize` callee), or when the user asks for it.
 - Every plugin has an entry in `.claude-plugin/marketplace.json`. `name` matches across the directory, `plugin.json`, the main skill's `SKILL.md` frontmatter and the marketplace entry. Bump `version` in both manifests when a plugin changes.
 - Write `SKILL.md` for both harnesses: no Claude Code-only tool names or `$ARGUMENTS` placeholders; describe tools by what they do. OpenCode honours `disable-model-invocation: true` and loads skills with `@<name>`.
 - Run `claude plugin validate .` after changing a manifest.
