@@ -37,7 +37,7 @@ Once you know what the answer holds and before you write it, ask terminal vs HTM
 - HTML page, when it needs more than three parts, overflows `diagramize`'s terminal limits (20 lines, 80 columns), or is an HTML-only kind (UI, dense graph).
 - Terminal, otherwise (handles one to three visuals that fit).
 
-Skip the question and use that place instead when the topic named it (`in html`, `in terminal`, `to <file>.md`, `to <file>.html`, `to docs`), when it is a follow-up (reuse the previous place unless renamed), or when the harness cannot ask (use the recommended choice). Ask via harness question tool, or plain question; if non-interactive use recommended.
+Skip the question and use that place instead when the topic named it (`in html`, `in terminal`, `to <file>.md`, `to <file>.html`, `to docs`), when it is a follow-up (reuse the previous place unless renamed), or when no question tool exists (use the recommended choice). Ask with the host's question tool, or a plain question; if non-interactive use recommended.
 
 ## 5. Write the reply (terminal)
 
@@ -51,7 +51,7 @@ The reply is, in order:
 
 These cover the answer, notes, saved files and HTML page. Visuals keep compact notation.
 
-- Name the mechanism and the actor: which function calls which, what it returns, what fails and how. Write "the loader parses the file", not "the file is parsed".
+- Name the mechanism and the actor: which function calls which, what it returns, what fails and how. Use active voice: "the loader parses the file".
 - Call each thing by its code name, and keep using it. Prefer plain, measured words with numbers over adverbs and metaphors.
 - Mark unverified paths with `(?)` instead of hedging the sentence. Hedge once, only where unsure.
 - Start with the answer and end after the last note. No greeting, praise, summary line or offer of more help.
@@ -60,4 +60,4 @@ These cover the answer, notes, saved files and HTML page. Visuals keep compact n
 
 - Follow-up: when the new question extends the previous visual, have `diagramize` extend it per its §8, for the same place.
 - Save: write to the named file, or to `<cwd>/docs/explain/<topic-slug>.md` for `to docs` (relative to the working directory, never into the skills install). The file holds answer, notes and Markdown visuals; reply with the two-sentence answer and the absolute path.
-- HTML page: have `diagramize` build it from its `references/page-template.html`, handing it the answer and notes to place around the visuals. Always pass the explicit path `${TMPDIR:-/tmp}/explain/<topic-slug>.html` (or the `to <file>.html` path); `diagramize` writes there, opens it and hands the path back. Reply with the two-sentence answer and the path.
+- HTML page: have `diagramize` build it from its `references/page-template.html`. Pass the answer and notes to place around the visuals. Always pass the explicit path `${TMPDIR:-/tmp}/explain/<topic-slug>.html` (or the `to <file>.html` path); `diagramize` writes there, opens it and hands the path back. Reply with the two-sentence answer and the path.

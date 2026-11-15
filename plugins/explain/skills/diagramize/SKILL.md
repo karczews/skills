@@ -99,7 +99,7 @@ Before and after (combined ≤20 lines). Pick the form that stays readable:
 - HTML-escape every diagram source inside `<pre>` (as the generator does with `html.escape()`). Read sources back with `textContent`, never `innerHTML`, so `<`, `<<interface>>` and `-->` survive.
 - Mermaid kinds go in `<pre class="mermaid">`; trees, pseudocode, diffs and examples in `<pre class="text">`; comparison and before/after tables as HTML `<table>`. Mermaid blocks keep the `references/` configs. No 20-line limit: draw the whole path instead of cutting to `…`, but still split when it answers more than one question.
 - For a UI use real labels, values, states, colours, fonts and component names from the project's theme; read that code when the caller did not hand it over. For a UI change show before/after side by side, stacked on narrow windows. Fit a narrow window.
-- Write to the caller's path; only for a direct call default to `${TMPDIR:-/tmp}/diagramize/<topic-slug>.html`, outside the repo. Follow step 6 and check per step 7. Open with `open` (macOS) / `xdg-open` (Linux), or the harness HTML viewer when it has one. Hand the path back to the caller.
+- Write to the caller's path; only for a direct call default to `${TMPDIR:-/tmp}/diagramize/<topic-slug>.html`, outside the repo. Follow step 6 and check per step 7. Open with `open` (macOS) / `xdg-open` (Linux), or the host HTML viewer when it has one. Hand the path back to the caller.
 
 ## 6. Mermaid rules
 
