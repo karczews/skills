@@ -31,7 +31,7 @@ Direct call: text after the invocation names the subject; a trailing `in termina
 | what changes, or what would change                   | before and after (step 3)   | before and after, in the same kinds |
 | how a UI looks, or a graph too dense for text        | does not fit, say so        | HTML page only (step 5)             |
 
-A chain with no branch, fan-out, loop and a single actor stays text in every destination; this overrides the Mermaid column. A Mermaid block for it would be a sentence in boxes.
+A chain with no branch, fan-out, loop and a single actor stays text in every destination; this overrides the Mermaid column.
 
 ## 3. Terminal
 
@@ -95,7 +95,7 @@ Before and after (combined ≤20 lines). Pick the form that stays readable:
 
 ## 5. HTML page
 
-- Build from `references/page-template.html` (next to this file in `references/`). Paste the answer/notes around the diagrams unchanged, and the two `references/mermaid-*.json` configs where marked. Never fetch files at runtime; a page opened from disk cannot load siblings.
+- Build from `references/page-template.html` (next to this file in `references/`). Paste the answer/notes around the diagrams unchanged, and the two `references/mermaid-*.json` configs where marked. Inline configs; do not fetch.
 - HTML-escape every diagram source inside `<pre>` (as the generator does with `html.escape()`). Read sources back with `textContent`, never `innerHTML`, so `<`, `<<interface>>` and `-->` survive.
 - Mermaid kinds go in `<pre class="mermaid">`; trees, pseudocode, diffs and examples in `<pre class="text">`; comparison and before/after tables as HTML `<table>`. Mermaid blocks keep the `references/` configs. No 20-line limit: draw the whole path instead of cutting to `…`, but still split when it answers more than one question.
 - For a UI use real labels, values, states, colours, fonts and component names from the project's theme; read that code when the caller did not hand it over. For a UI change show before/after side by side, stacked on narrow windows. Fit a narrow window.

@@ -27,19 +27,17 @@ What goes into the visual: symbols and paths spelled as in code, with caller ann
 ## 3. Pick the visual
 
 - For the exact code to write, the visual is the full code block, only when a diff's missing lines would hide where it goes.
-- Otherwise tell `diagramize` what the question asks; it picks the kind from its table and draws it for the destination. When the terminal shape would overflow, step 4 recommends HTML.
+- Otherwise tell `diagramize` what the question asks; it picks the kind from its table and draws it for the destination.
 - For a change that does not ask for exact code, the visual is `diagramize`'s before and after in the same kind, marked per its §3 conventions. When the change spans modules, pair it with a file tree diff or name the omitted parts in one note line.
 
 ## 4. Ask where to show it
 
-Once you know what the answer holds and before you write it, ask terminal vs HTML and mark one recommended:
+Once you know what the answer holds and before you write it, ask terminal vs HTML (§5 vs §6) and mark one recommended:
 
 - HTML page, when it needs more than three parts, overflows `diagramize`'s terminal limits (20 lines, 80 columns), or is an HTML-only kind (UI, dense graph).
 - Terminal, otherwise (handles one to three visuals that fit).
 
-Skip the question and use that place instead when the topic named it (`in html`, `in terminal`, `to <file>.md`, `to <file>.html`, `to docs`), when it is a follow-up (reuse the previous place unless renamed), or when the harness cannot ask (use the recommended choice). AskUserQuestion where available, otherwise a plain two-option question; if non-interactive, use the recommended without asking.
-
-For the terminal write the reply as in step 5. For HTML build the page as in step 8.
+Skip the question and use that place instead when the topic named it (`in html`, `in terminal`, `to <file>.md`, `to <file>.html`, `to docs`), when it is a follow-up (reuse the previous place unless renamed), or when the harness cannot ask (use the recommended choice). Ask via harness question tool, or plain question; if non-interactive use recommended.
 
 ## 5. Write the reply (terminal)
 
