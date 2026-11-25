@@ -1,25 +1,27 @@
 # skills
 
-Agent skills for [Claude Code](https://code.claude.com) and [OpenCode](https://opencode.ai). Each plugin lives under `plugins/<name>/` and is listed in `.claude-plugin/marketplace.json`. The `explain` plugin holds two skills, `explain` and `diagramize`.
+Agent skills for [Claude Code](https://code.claude.com) and [OpenCode](https://opencode.ai). Each plugin lives under `plugins/<name>/` and is listed in `.claude-plugin/marketplace.json`. The `explain` plugin holds two skills, `explain` and `diagramize`; the `code-simplifier` plugin holds one.
 
 ## Installation
 
-Claude Code, as a plugin:
+Claude Code, as a plugin (install either plugin on its own):
 
 ```text
 /plugin marketplace add karczews/skills
 /plugin install explain@karczews-skills
+/plugin install code-simplifier@karczews-skills
 ```
 
-The plugin installs both `explain` and `diagramize`.
+The `explain` plugin installs both `explain` and `diagramize`.
 
-Any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports, including OpenCode (install both skills; `explain` cannot draw without `diagramize`):
+Any agent the [`skills` CLI](https://github.com/vercel-labs/skills) supports, including OpenCode:
 
 ```bash
-npx skills add karczews/skills --skill explain --skill diagramize -a opencode
+npx skills add karczews/skills --skill explain --skill diagramize -a opencode   # explain cannot draw without diagramize
+npx skills add karczews/skills --skill code-simplifier -a opencode
 ```
 
-Or copy each directory under `plugins/explain/skills/` into `~/.config/opencode/skills/` (OpenCode) or `~/.claude/skills/` (both read it). `explain` needs `diagramize` next to it.
+Or copy a skill's directory from `plugins/<plugin>/skills/` into `~/.config/opencode/skills/` (OpenCode) or `~/.claude/skills/` (both read it). `explain` needs `diagramize` next to it.
 
 ## Available skills
 
@@ -50,6 +52,20 @@ After changing a config or a `docs/diagramize/*.mmd` source, run `scripts/render
 /diagramize the login flow in html           # Claude Code, standalone skill
 @diagramize the login flow in html           # OpenCode
 ```
+
+### code-simplifier
+
+Simplifies recently changed code without changing what it does. It follows the project's conventions, reuses existing helpers, and reverts any edit that breaks a check that passed before. When the host can launch subagents, one does the pass with fresh eyes.
+
+It runs only when you ask for it, optionally naming files, a directory, a commit range or a branch:
+
+```text
+/code-simplifier:code-simplifier src/auth   # Claude Code, plugin install
+/code-simplifier src/auth                   # Claude Code, standalone skill
+@code-simplifier src/auth                   # OpenCode
+```
+
+With nothing named, it works on the session's changes, or else on uncommitted changes. It mainly serves OpenCode; Claude Code has a similar built-in `/simplify`.
 
 ## Adding a skill
 

@@ -21,6 +21,18 @@
       "source": "./plugins/explain",
       "category": "productivity",
       "keywords": ["explain", "visualization", "diagrams", "mermaid", "call-tree", "code"]
+    },
+    {
+      "name": "code-simplifier",
+      "description": "Simplify recently changed code for clarity and consistency without changing what it does",
+      "version": "1.1.1",
+      "author": {
+        "name": "Krzysztof Karczewski",
+        "email": "kr.karczewski@gmail.com"
+      },
+      "source": "./plugins/code-simplifier",
+      "category": "development",
+      "keywords": ["simplify", "refactor", "code-quality", "cleanup"]
     }
   ]
 }
