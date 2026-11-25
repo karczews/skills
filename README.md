@@ -55,7 +55,7 @@ After changing a config or a `docs/diagramize/*.mmd` source, run `scripts/render
 
 ### code-simplifier
 
-Simplifies recently changed code as a pure refactor: outputs, side effects, errors and public signatures stay the same. Before editing, it reads the project's `AGENTS.md` or `CLAUDE.md` and linter configs, looks for existing helpers the change re-implements, and records which checks already fail. It flattens nesting, removes redundancy and speculative generality, reuses existing helpers and renames for clarity, then reverts any edit that breaks a passing check. Its report lists the code no check covers and the larger simplifications it skipped because they are not pure refactors. When the host can launch subagents, it hands the pass to one for fresh eyes and reviews the subagent's whole diff.
+Simplifies recently changed code without changing what it does. It follows the project's conventions, reuses existing helpers, and reverts any edit that breaks a check that passed before. When the host can launch subagents, one does the pass with fresh eyes.
 
 It runs only when you ask for it, optionally naming files, a directory, a commit range or a branch:
 
@@ -65,7 +65,7 @@ It runs only when you ask for it, optionally naming files, a directory, a commit
 @code-simplifier src/auth                   # OpenCode
 ```
 
-With nothing named, it works on the code changed in the session, or else on uncommitted changes. Claude Code also has a built-in `/simplify` with a similar job; this skill is mainly for OpenCode and for one behavior across both hosts.
+With nothing named, it works on the session's changes, or else on uncommitted changes. It mainly serves OpenCode; Claude Code has a similar built-in `/simplify`.
 
 ## Adding a skill
 
